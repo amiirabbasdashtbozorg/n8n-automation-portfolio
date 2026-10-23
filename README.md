@@ -25,3 +25,31 @@ A curated collection of production-ready, enterprise-grade **n8n workflows** spe
 
 ## 📬 Connect & Contact
 If you'd like to discuss these architectures, review custom automation requirements, or explore potential collaborations, feel free to reach out!
+
+---
+
+## 🐳 Self-Hosted Infrastructure (Docker Setup)
+All workflows in this repository are developed and tested on a self-hosted **n8n** instance backed by **PostgreSQL** using Docker. 
+
+To spin up the local environment, use the provided `docker-compose.yml` file:
+
+```bash
+# Start containers in detached mode
+docker compose up -d
+
+# Access n8n locally
+http://localhost:5678
+
+---
+
+## 🐳 Self-Hosted Infrastructure (Docker Setup)
+All workflows in this repository are developed and tested on a self-hosted **n8n** instance backed by **PostgreSQL** using Docker. 
+
+To spin up the local environment, use the provided `docker-compose.yml` file:
+
+```bash
+# Start containers in detached mode
+docker compose up -d
+
+# Access n8n locally
+http://localhost:5678
