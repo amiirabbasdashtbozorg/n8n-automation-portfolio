@@ -1,0 +1,331 @@
+{
+  "name": "Khanoumi Website Extractor",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "#  Automated E-Commerce Price Intelligence & Discount Tracker\n\n### Overview\nAn end-to-end automated ETL & data aggregation pipeline built in **n8n** that continuously monitors e-commerce flash sales,\n cleanses multi-currency/bilingual pricing data, and syncs updates to Google Sheets in near real-time.\n\n---\n\n### Architecture & Technical Highlights\n\n* **Headless Browser Orchestration (Browserless.io / Chromium):**\n  Bypasses client-side rendering (CSR/SSR) bottlenecks and dynamic DOM injection (React/Next.js) \nby orchestrating a remote headless Chrome instance with selector-wait conditions (`waitForSelector: a.relative`).\n\n* **DOM Parsing & Regex Transformation:**\n  Extracts unstructured HTML fragments, parses multi-tier pricing, \nhandles Persian/Arabic numeral normalization to numeric formats, and filters exclusive badge attributes (`جدید`).\n\n* **Stateful Deduplication & Cache Layer:**\n  Leverages execution-persisted hashing to filter out previously ingested product URLs, drastically reducing redundant write operations and quota consumption.\n\n* **Idempotent Data Sync (Google Sheets):**\n  Executes an upsert workflow (`appendOrUpdate`) matching primary keys (`Product Name` / `URL`) to prevent row fragmentation and maintain historical price accuracy.\n\n---\n\n### Tech Stack\n`n8n` • `Headless Chrome / Browserless` • `JavaScript (ES6+)` • `DOM / CSS Selectors` • `Google Sheets API` • `ETL Pipelines`",
+        "height": 768,
+        "width": 1664,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -208
+      ],
+      "id": "31c43e50-cd44-4791-b3c5-81148fa3d642",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "\n![Logo](https://micopon.ir/wp-content/uploads/2021/10/khanoumi.jpg)\n",
+        "height": 368,
+        "width": 352,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        528,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "3d34abb5-a88a-4feb-be30-d619d8f430ce",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -352,
+        320
+      ],
+      "id": "daf96bde-99d9-4e47-997c-314c0c5553bc",
+      "name": "Every 30m Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://production-lon.browserless.io/content",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"url\": \"https://www.khanoumi.com/tags/festival-js?sort=Newest\",\n  \"waitForSelector\": { \"selector\": \"a.relative\", \"timeout\": 10000 },\n  \"bestAttempt\": true\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -160,
+        320
+      ],
+      "id": "15c7f221-f5c0-4522-b1c3-f2eb7ecb6d4d",
+      "name": "Browserless Headless Fetch",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "OIssBlAco7AUsLwT",
+          "name": "Query Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "cards",
+              "cssSelector": "a.relative",
+              "returnValue": "html",
+              "returnArray": true
+            },
+            {
+              "key": "hrefs",
+              "cssSelector": "a.relative",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        320
+      ],
+      "id": "a9071de3-d2b3-467d-8ef9-e1848206c8ae",
+      "name": "Extract Product Cards"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Expect: item.json.cards = [inner HTML of each <a.relative>]\n//         item.json.hrefs = [href attr for each <a.relative>] (same index)\nconst toEnglish = s =>\n  (s||'')\n    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))\n    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));\n\nconst onlyDigits = s => {\n  s = toEnglish(s).replace(/[\\s,٬٫]/g, '').replace(/[^0-9]/g, '');\n  return s ? Number(s) : null;\n};\n\nconst pick = (html, re) => (html.match(re)?.[1] || '').trim();\n\nconst out = [];\nfor (const it of items) {\n  const cards = it.json.cards || [];\n  const hrefs = it.json.hrefs || [];\n  for (let i = 0; i < cards.length; i++) {\n    const card = cards[i];\n\n    // keep only items with the \"جدید\" badge\n    if (!/>\\s*جدید\\s*</.test(card)) continue;\n\n    const href = (hrefs[i] || '').trim();\n    const url  = href.startsWith('http') ? href : `https://www.khanoumi.com${href}`;\n\n    const name = pick(card, /<h3[^>]*>([\\s\\S]*?)<\\/h3>/i).replace(/<[^>]+>/g, '');\n\n    // % off: look for any number just before the percent sign\n    const pMatch = card.match(/([\\d۰-۹٠-٩]{1,3})\\s*٪/);\n    const percent = pMatch ? Number(toEnglish(pMatch[1])) : null;\n\n    const beforeText = pick(card, /<span[^>]*class=\"[^\"]*line-through[^\"]*\"[^>]*>([^<]+)<\\/span>/i);\n    const afterText  = pick(card, /<span[^>]*class=\"[^\"]*font-medium[^\"]*\"[^>]*>([^<]+)<\\/span>/i);\n\n    const priceBefore = onlyDigits(beforeText);\n    const priceAfter  = onlyDigits(afterText);\n\n    if (name && url) {\n      out.push({ json: {\n        \"Product Name\": name,\n        \"Percentage Off\": percent,\n        \"Price Before\": priceBefore,\n        \"Price After\": priceAfter,\n        \"URL\": url,\n        \"Updated At\": new Date().toLocaleString('fa-IR', { timeZone:            'Asia/Tehran' }),\n        \"state_key\": `${url}_${priceAfter}`\n      }});\n    }\n  }\n}\nreturn out.slice(0, 100);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        320
+      ],
+      "id": "d934af14-5deb-42ec-8602-3fdfe5a0733f",
+      "name": "Parse & Normalize Pricing"
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "=state_key",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        416,
+        320
+      ],
+      "id": "340d01cd-696d-4fc5-8cef-5d80372e0dc2",
+      "name": "Filter Unchanged States"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1GtLmSv1ISgVfRxibijtLGTtRSDD3Ml6AFe9Eb0H4YOo",
+          "mode": "list",
+          "cachedResultName": "Khanoumi",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GtLmSv1ISgVfRxibijtLGTtRSDD3Ml6AFe9Eb0H4YOo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GtLmSv1ISgVfRxibijtLGTtRSDD3Ml6AFe9Eb0H4YOo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Product Name": "={{ $json[\"Product Name\"] }}",
+            "Percentage Off": "={{ $json[\"Percentage Off\"] }}",
+            "Price Before": "={{ $json[\"Price Before\"] }}",
+            "Price After": "={{ $json[\"Price After\"] }}",
+            "URL": "={{ $json.URL }}"
+          },
+          "matchingColumns": [
+            "URL"
+          ],
+          "schema": [
+            {
+              "id": "Product Name",
+              "displayName": "Product Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Percentage Off",
+              "displayName": "Percentage Off",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price Before",
+              "displayName": "Price Before",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price After",
+              "displayName": "Price After",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        624,
+        320
+      ],
+      "id": "8e4fbd1c-bdba-42d4-a8c3-75d3b6a3ea8e",
+      "name": "Upsert to Google Sheets",
+      "alwaysOutputData": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ntNqjjjgwcRdYv1l",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every 30m Trigger": {
+      "main": [
+        [
+          {
+            "node": "Browserless Headless Fetch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Browserless Headless Fetch": {
+      "main": [
+        [
+          {
+            "node": "Extract Product Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Product Cards": {
+      "main": [
+        [
+          {
+            "node": "Parse & Normalize Pricing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Normalize Pricing": {
+      "main": [
+        [
+          {
+            "node": "Filter Unchanged States",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Unchanged States": {
+      "main": [
+        [
+          {
+            "node": "Upsert to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9d2d8873-d7dc-428f-9cb8-1b6df7e2737b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e2fe44d912cff8baade04deeae5fab81664f14d3b906c4d802bf55064b6ae86"
+  },
+  "nodeGroups": [],
+  "id": "ydUkdsOF8ac6o8Hv",
+  "tags": []
+}

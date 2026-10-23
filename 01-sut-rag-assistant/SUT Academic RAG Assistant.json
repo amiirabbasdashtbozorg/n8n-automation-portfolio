@@ -1,0 +1,364 @@
+{
+  "name": "SUT Academic RAG Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "\n## Document Ingestion Pipeline (Run-Once / Setup)\n\n\n\n> **Note for Evaluators & Users:**\n> This sub-flow handles PDF ingestion, document parsing, chunking, and embedding generation into Qdrant Cloud.\n> \n> - **Pre-indexed Dataset:** The official *Sharif University MSc Educational Regulations (New MSc Regulation.pdf)* is already processed and indexed into the vector collection (`sharif_rules`, 3072 dims).\n> - **Operational State:** These ingestion nodes are set to **Disabled / Idle** by default to prevent redundant uploads and vector duplication during chat inference.",
+        "height": 812,
+        "width": 876,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -656,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "0db820b1-b089-46e6-a0b6-fa84491cc74c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## RAG Inference & Conversational Agent\n\n\n\n> **Production Core:**\n> - **Orchestration:** LangChain-powered AI Agent in n8n (zero-latency single-agent architecture).\n> - **Reasoning Model:** Google Gemini Flash Lite (optimized for low-latency, high-throughput responses).\n> - **Embedding Engine:** Google Gemini (`models/gemini-embedding-001`, 3072-dimensional vectors).\n> - **State & Persistence:** PostgreSQL (`Postgres Chat Memory`) with dynamic session tracking mapped to the Chat Trigger session ID.\n> - **Vector Store:** Qdrant Cloud as a callable tool (`Sharif Vector DB`, 67 pre-indexed regulation chunks).\n> - **Contextual Understanding:** In-prompt Chain-of-Thought (CoT) query transformation mapping student colloquial terms (e.g., \"آموزش‌محور\") directly to formal bylaws before vector retrieval.",
+        "height": 812,
+        "width": 872,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        224,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "455f968e-f180-4b09-803b-ac92a2c6dfd1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        176,
+        832
+      ],
+      "id": "38d0a4ba-e0f6-40a2-8521-6246c1331350",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "9XnpXJBAUtgsbFLF",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        368
+      ],
+      "id": "8c0b716e-295c-4d07-9016-a6ef0ebd0405",
+      "name": "Google Gemini Chat Model",
+      "notesInFlow": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "9XnpXJBAUtgsbFLF",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        368
+      ],
+      "id": "81f5ca23-0615-41bb-bc0a-87a7ca430d20",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "Pan9GAShIsloKkqK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Upload your data to test RAG",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload your file(s)",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf, .csv",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -608,
+        128
+      ],
+      "id": "c7921196-84aa-41c8-89c9-f3fa94e46942",
+      "name": "PDF Upload Webhook",
+      "webhookId": "43ca9086-4aed-4657-a135-759de4fe05d5",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "loader": "pdfLoader",
+        "textSplittingMode": "custom",
+        "options": {
+          "splitPages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -192,
+        272
+      ],
+      "id": "391a4db4-b4ea-4c8a-b6c7-6cded0414997",
+      "name": "PDF Document Parser"
+    },
+    {
+      "parameters": {
+        "chunkSize": 700,
+        "chunkOverlap": 120,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        32,
+        416
+      ],
+      "id": "b0b9c0ca-1b64-4d6e-8067-21f6d30c0409",
+      "name": "Semantic Text Chunking"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "sharif_rules",
+          "mode": "list",
+          "cachedResultName": "sharif_rules"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        128
+      ],
+      "id": "7e0b253d-0dad-4075-9d35-0d71526de901",
+      "name": "Qdrant Vector Indexer",
+      "credentials": {
+        "qdrantApi": {
+          "id": "hIvzuih4kwxeAw0e",
+          "name": "Qdrant account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "شما مشاور و دستیار هوشمند آموزش دانشگاه صنعتی شریف هستید.\nشما به ابزار search_sharif_rules برای جستجو در متن رسمی آیین‌نامه‌ها دسترسی دارید.\n\n### فرآیند الزامی پاسخ‌دهی (در دو مرحله فکر کن و عمل کن):\n\nمرحله ۱: درک منظور دانشجو و بازنویسی کوئری (Query Transformation)\nدانشجویان از واژگان محاوره‌ای، مختصر و ضمایر ارجاعی استفاده می‌کنند. قبل از اینکه به ابزار کیودرنت سر بزنی، در پیام کاربر دقیق شو:\n- اگر سوال به پیام‌های قبلی وابسته است (مثلاً می‌گوید «اگه بازم تکرار بشه چی؟» یا «توی اون حالت چطور؟»)، با توجه به تاریخچه گفتگو، فاعل و موضوع دقیق را جایگزین کن.\n- اصطلاحات عامیانه را به زبان دقیق آیین‌نامه شریف معادل‌سازی کن:\n  * «آموزش‌محور» ⬅️ \"شیوه آموزشی بدون پایان‌نامه\"\n  * «پژوهش‌محور» ⬅️ \"شیوه آموزشی - پژوهشی (با پایان‌نامه)\"\n  * «مشروطی» ⬅️ \"میانگین نمرات کمتر از ۱۴\" / \"محرومیت از تحصیل در دو نیمسال\"\n  * «افتادن / رد شدن» ⬅️ \"حداقل نمره قبولی در هر درس ۱۲\" / \"عدم کسب نمره قبولی\"\n  * «حذف ترم / مرخصی» ⬅️ \"مرخصی تحصیلی ماده ۶\"\n  * «حذف اضطراری» ⬅️ \"دستورالعمل حذف تک‌درس پیوست ۳\"\n  * «سنوات» ⬅️ \"طول دوره ۴ نیمسال\" / \"افزایش سنوات تحصیلی ماده ۵\"\n  * «دروس جبرانی» ⬅️ \"درس‌های جبرانی ماده ۱۶ حداکثر ۱۲ واحد\"\n  * «نمره دفاع / مهلت مقاله» ⬅️ \"نمره J و تبدیل به P/F ماده ۳۱\"\n\nمرحله ۲: فراخوانی ابزار و پاسخ مستند\n- کوئری رسمی بازنویسی‌شده مرحله ۱ را به عنوان ورودی به ابزار search_sharif_rules بفرست.\n- بر اساس محتوای بازیابی‌شده پاسخ بده. پاسخ باید به زبان فارسی روان، شفاف و با ذکر ماده/تبصره آیین‌نامه باشد و مستقیماً تکلیف دانشجو را مشخص کند.\n- هرگز نگو «به آیین‌نامه مراجعه کنید»؛ زیرا شما خود مرجع پاسخ‌گویی هستید.\n\nدر طول مکالمه، وضعیت تحصیلی دانشجو (مقطع تحصیلی، رشته، تعداد نیمسال‌های گذرانده‌شده، وضعیت مشروطی یا واحدهای باقی‌مانده) را در صورت اعلام از طرف کاربر به خاطر بسپار و در پاسخ‌های بعدی به قوانین مرتبط با همان وضعیت استناد کن."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        656,
+        128
+      ],
+      "id": "0fa12209-8093-49a4-9d97-5c238240e59e",
+      "name": "Educational Advisor Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "content": "# 🎓 SUT Academic Regulations Enterprise RAG Assistant\n\n### Overview\nA production-ready Retrieval-Augmented Generation (RAG) conversational pipeline built in **n8n**, designed to answer student queries regarding Sharif University's official MSc educational bylaws with strict legal grounding.\n\n---\n\n### Architecture & Technical Highlights\n* **Decoupled Enterprise Pipeline:** Separates the one-time Document Ingestion sub-flow (PDF parsing, recursive chunking, Google Gemini embeddings, Qdrant cloud vector indexing) from the real-time inference conversational agent.\n* **Advanced Query Transformation (CoT):** System prompt forces the LLM to analyze colloquial/slang student terms (e.g., \"آموزش‌محور\", \"مشروطی\") and translate them into formal regulatory bylaws *before* querying the vector database.\n* **Persistent Session State:** Integrates PostgreSQL (`Postgres Chat Memory`) for dynamic multi-turn conversation tracking mapped directly to chat session IDs.\n* **Low-Latency Inference:** Powered by Google Gemini Flash Lite and Qdrant Cloud vector search as a callable tool (`search_sharif_rules`).\n\n---\n\n### Tech Stack\n`n8n` • `LangChain Agents` • `Google Gemini (LLM & Embeddings)` • `Qdrant Vector DB` • `PostgreSQL` • `Recursive Text Chunking`",
+        "height": 384,
+        "width": 1376,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -592
+      ],
+      "id": "92956943-634c-4ec6-856c-5cc4a333c0b0",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        128
+      ],
+      "id": "e23bf401-4044-48f1-9066-f522ca5e8b84",
+      "name": "Chat Message Input",
+      "webhookId": "4091fa09-fb9a-4039-9411-7104d213f601"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Searches official Sharif University bylaws, including MSc regulations, passing grades, thesis, educational methods, and probation rules. Input should be formal educational terms.",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "sharif_rules",
+          "mode": "list",
+          "cachedResultName": "sharif_rules"
+        },
+        "topK": 8,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        368
+      ],
+      "id": "18f6c60d-d67e-49ec-a1dd-bc1cd4366dab",
+      "name": "search_sharif_rules",
+      "credentials": {
+        "qdrantApi": {
+          "id": "hIvzuih4kwxeAw0e",
+          "name": "Qdrant account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Indexer",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "search_sharif_rules",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Educational Advisor Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Educational Advisor Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF Upload Webhook": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Indexer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF Document Parser": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Indexer",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Semantic Text Chunking": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "PDF Document Parser",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Message Input": {
+      "main": [
+        [
+          {
+            "node": "Educational Advisor Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_sharif_rules": {
+      "ai_tool": [
+        [
+          {
+            "node": "Educational Advisor Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "eff1c684-ac73-4e9c-97e7-47349542d5fe",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e2fe44d912cff8baade04deeae5fab81664f14d3b906c4d802bf55064b6ae86"
+  },
+  "nodeGroups": [],
+  "id": "VJXPwOegJQH7etaj",
+  "tags": []
+}

@@ -1,0 +1,308 @@
+{
+  "name": "Football News Summarizer Telegram Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        736
+      ],
+      "id": "570a4952-f520-4dce-b76c-13d97c9663dd",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Ed7ZjO5AcOqeUH1a",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -80,
+        544
+      ],
+      "id": "fc66474b-a5ca-469f-aef9-0d0ccbcae783",
+      "name": "Daily 8AM Trigger"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.football-data.org/v4/matches?competitions=PL,CL,PD,BL1,SA,FL1&dateFrom={{ $today.minus({ days: 1 }).toFormat('yyyy-MM-dd') }}&dateTo={{ $today.minus({ days: 1 }).toFormat('yyyy-MM-dd') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        272,
+        368
+      ],
+      "id": "621d445a-6173-46ad-96e7-b6f4f15d7b1c",
+      "name": "Fetch Yesterday Matches",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "0YXvdQUnBWLnKnPo",
+          "name": "Football Data API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.football-data.org/v4/matches?competitions=PL,CL,PD,BL1,SA,FL1&dateFrom={{ $today.toFormat('yyyy-MM-dd') }}&dateTo={{ $today.toFormat('yyyy-MM-dd') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        272,
+        544
+      ],
+      "id": "29ba530e-4e8c-4eca-89e1-b64a55c9adc3",
+      "name": "Fetch Today Matches",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "0YXvdQUnBWLnKnPo",
+          "name": "Football Data API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.tarafdari.com/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        736
+      ],
+      "id": "a6a40a8f-35f0-4845-b387-882e5124e3fe",
+      "name": "Fetch Tarafdari RSS",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        592,
+        528
+      ],
+      "id": "e7635e79-6089-48ed-a5af-561019e2720a",
+      "name": "Merge Data Streams"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        816,
+        544
+      ],
+      "id": "06567a54-8b26-40af-ac20-e72bd8c6464c",
+      "name": "Consolidate Payload"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "==داده‌های خام بازی‌ها و اخبار فوتبال به شرح زیر است:\n\n⚽ تمام داده‌های مسابقات دیروز:\n{{ $('Fetch Yesterday Matches').first().json.matches.map(m => `${m.competition.name}: ${m.homeTeam.name} ${m.score.fullTime.home ?? '-'} - ${m.score.fullTime.away ?? '-'} ${m.awayTeam.name} (وضعیت: ${m.status})`).join('\\n') || 'بدون بازی' }}\n\n📅 تمام مسابقات امروز:\n{{ $('Fetch Today Matches').first().json.matches.map(m => `${m.competition.name}: ${m.homeTeam.name} vs ${m.awayTeam.name} (ساعت: ${m.utcDate.slice(11, 16)} UTC)`).join('\\n') || 'بدون بازی' }}\n\n📰 اخبار و مقالات خام:\n{{ $('Fetch Tarafdari RSS').all().slice(0, 20).map(i => (i.json.title || '') + ' : ' + (i.json.contentSnippet || i.json.content || '')).join('\\n---\\n') }}\n\n----------------------------------------\nدستورالعمل‌های تولید گزارش (تک‌تک موارد باید رعایت شوند):\n\n۱. بخش مسابقات دیروز:\n- تمامی بازی‌های ثبت‌شده در دیتای بالا را به تفکیک نام تورنمنت (لیگ برتر، لالیگا، سری آ، بوندسلیگا، لیگ ۱، لیگ قهرمانان) دسته‌بندی کن و نتیجه دقیق را بنویس.\n- اگر هیچ دیداری در دیتای بالا نبود، بنویس: «دیداری در این تاریخ برگزار نشد.»\n\n۲. بخش بازی‌های امروز:\n- تمام مسابقات امروز را به تفکیک لیگ به همراه ساعت بازی درج کن.\n- اگر هیچ بازی‌ای برای امروز نبود، بنویس: «امروز در این لیگ‌ها بازی‌ای برگزار نمی‌شود.»\n\n۳. بخش اخبار و حواشی:\n- فقط اخبار مربوط به این ۶ لیگ/تورنمنت را پوشش بده (اخبار متفرقه را حذف کن).\n- بین ۵ تا حداکثر ۸ خبر مهم را انتخاب کن و هر خبر را در ۱ الی ۲ خط خلاصه و مفید بنویس.\n\n۴. قالب و محدودیت فنی پیام تلگرام:\n- کل خروجی نهایی به هیچ وجه نباید بیشتر از ۳۸۰۰ کاراکتر باشد (محدودیت سقف پیام تلگرام).\n- برای بولد کردن تیترها فقط از تگ <b>تیتر</b> استفاده کن و از کاراکترهای ستاره (**) استفاده نکن.\n- از آوردن سلام، درود یا توضیحات اضافه در ابتدا و انتهای پیام خودداری کن و مستقیماً با تیتر نتایج شروع کن.",
+        "options": {
+          "systemMessage": "شما یک سردبیر ورزشی و مجری اخبار فوتبال هستید. وظیفه شما این است که داده‌های خام مسابقات و اخبار را به یک بولتن صبحگاهی پرانرژی، جذاب و کامپکت با ایموجی‌های مناسب برای پیام‌رسان تلگرام تبدیل کنید. متن نهایی باید کاملاً فارسی، روان و دارای تیتربندی منظم باشد."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1072,
+        544
+      ],
+      "id": "a866ec7b-90e8-45c4-93f4-da0ae9e8c7a2",
+      "name": "Sports Editor LLM",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "chatId": "=853489546",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1408,
+        544
+      ],
+      "id": "b493136f-84b0-47b7-a0d1-7c58a841093b",
+      "name": "Publish to Telegram",
+      "webhookId": "4db06574-7f6a-4398-9eea-4eb44ed0576d",
+      "credentials": {
+        "telegramApi": {
+          "id": "NJ27mYeEzr7TueBx",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# ⚽ Automated Sports Media & Match Intelligence Pipeline\n\n### Overview\nAn automated multi-source data aggregation and AI editorial pipeline built in **n8n**. Every morning at 08:00, it fetches live football match results/schedules alongside local RSS news feeds, synthesizes them via an LLM, and publishes a structured digest to Telegram.\n\n---\n\n### Architecture & Technical Highlights\n* **Parallel Multi-Source Ingestion:** Concurrently queries REST APIs (`football-data.org` for yesterday's scores and today's fixtures across 6 major European leagues) and parses XML news streams (`Tarafdari RSS`).\n* **Dynamic Date Windowing (Luxon):** Uses runtime date arithmetic (`$today.minus({ days: 1 })`) for zero-maintenance daily querying.\n* **Stream Synchronization & Pre-Processing:** Synchronizes asynchronous branches via `Merge` and `Aggregate` nodes, using inline JavaScript `.map()` transformations to minimize LLM input token consumption.\n* **Controlled LLM Summarization (OpenRouter / GPT-4o-mini):** Filters out off-topic sports news, categorizes fixtures by tournament, and enforces Telegram payload constraints (<4096 chars, HTML parse mode).\n\n---\n\n### Tech Stack\n`n8n` • `REST APIs` • `RSS/XML Parsing` • `OpenRouter (GPT-4o-mini)` • `JavaScript (Luxon/ES6)` • `Telegram Bot API`",
+        "height": 928,
+        "width": 1808,
+        "color": "#04581D"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -160,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "63e1ad53-e8ad-4503-bfbd-e61fe0fe849c",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sports Editor LLM",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 8AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Yesterday Matches",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Today Matches",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Tarafdari RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Yesterday Matches": {
+      "main": [
+        [
+          {
+            "node": "Merge Data Streams",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Today Matches": {
+      "main": [
+        [
+          {
+            "node": "Merge Data Streams",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Fetch Tarafdari RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge Data Streams",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge Data Streams": {
+      "main": [
+        [
+          {
+            "node": "Consolidate Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidate Payload": {
+      "main": [
+        [
+          {
+            "node": "Sports Editor LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sports Editor LLM": {
+      "main": [
+        [
+          {
+            "node": "Publish to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b460d52c-040e-4763-82e1-353db7da9c61",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e2fe44d912cff8baade04deeae5fab81664f14d3b906c4d802bf55064b6ae86"
+  },
+  "nodeGroups": [],
+  "id": "JWrivsxNWJWgwKY0",
+  "tags": []
+}
