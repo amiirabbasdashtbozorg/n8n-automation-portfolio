@@ -1,5 +1,7 @@
 # ⚽ Automated Sports Media & Match Intelligence Pipeline
 
+![Workflow Architecture](./assets/workflow-preview.png)
+
 An automated multi-source data aggregation and AI editorial pipeline built in **n8n**. Every morning, it fetches live football match results/schedules alongside local RSS news feeds, synthesizes them via an LLM, and publishes a structured digest to Telegram.
 
 ---

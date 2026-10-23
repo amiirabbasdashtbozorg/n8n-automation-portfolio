@@ -1,5 +1,7 @@
 # 🛍️ Automated E-Commerce Price Intelligence & Discount Tracker
 
+![Workflow Architecture](./assets/workflow-preview.png)
+
 An end-to-end automated ETL & data aggregation pipeline built in **n8n** that continuously monitors e-commerce flash sales, cleanses multi-currency/bilingual pricing data, and syncs updates to Google Sheets in near real-time.
 
 ---

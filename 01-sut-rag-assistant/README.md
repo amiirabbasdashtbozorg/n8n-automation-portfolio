@@ -1,5 +1,7 @@
 # 🎓 SUT Academic Regulations Enterprise RAG Assistant
 
+![Workflow Architecture](./assets/workflow-preview.png)
+
 A production-ready Retrieval-Augmented Generation (RAG) conversational pipeline built in **n8n**, designed to answer student queries regarding Sharif University's official MSc educational bylaws with strict legal grounding.
 
 ---
