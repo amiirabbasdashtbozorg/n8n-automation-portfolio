@@ -39,17 +39,3 @@ docker compose up -d
 
 # Access n8n locally
 http://localhost:5678
-
----
-
-## 🐳 Self-Hosted Infrastructure (Docker Setup)
-All workflows in this repository are developed and tested on a self-hosted **n8n** instance backed by **PostgreSQL** using Docker. 
-
-To spin up the local environment, use the provided `docker-compose.yml` file:
-
-```bash
-# Start containers in detached mode
-docker compose up -d
-
-# Access n8n locally
-http://localhost:5678
