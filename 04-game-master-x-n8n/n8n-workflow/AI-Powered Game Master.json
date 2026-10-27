@@ -1,0 +1,171 @@
+{
+  "name": "AI-Powered Game Master",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "game-master",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        -336,
+        176
+      ],
+      "id": "0ecd0798-c18e-4935-b376-a055beb26870",
+      "name": "Webhook",
+      "webhookId": "6f1af525-2775-4c47-a33b-f5a3bf82906a"
+    },
+    {
+      "parameters": {
+        "jsCode": "const gamesDB = [\n  { id: 1, title_fa: \"کتان\", min_players: 3, max_players: 4, duration: 90, complexity: \"متوسط\", categories: [\"استراتژیک\", \"خانوادگی\", \"مذاکره\"], description: \"ساخت جاده و شهر با جمع‌آوری منابع و مذاکره.\" },\n  { id: 2, title_fa: \"سیکرت هیتلر\", min_players: 5, max_players: 10, duration: 45, complexity: \"متوسط\", categories: [\"دورهمی\", \"نقش مخفی\", \"بلوف‌زنی\"], description: \"بازی نقش مخفی برای پیدا کردن فاشیست‌ها و هیتلر.\" },\n  { id: 3, title_fa: \"اسپلندور\", min_players: 2, max_players: 4, duration: 30, complexity: \"ساده\", categories: [\"خانوادگی\", \"اقتصادی\", \"مدیریت منابع\"], description: \"خرید جواهرات خام و ساخت امپراتوری تجاری.\" },\n  { id: 4, title_fa: \"کودنِیمز\", min_players: 2, max_players: 8, duration: 15, complexity: \"ساده\", categories: [\"دورهمی\", \"کلمه‌سازی\", \"تیمی\"], description: \"رقابت دو تیم جاسوسی با استفاده از سرنخ‌های یک‌کلمه‌ای.\" },\n  { id: 5, title_fa: \"استوژیت (دیکسیت)\", min_players: 3, max_players: 6, duration: 30, complexity: \"ساده\", categories: [\"خانوادگی\", \"خلاقانه\", \"تصویری\"], description: \"بازی بر پایه تخیل و دادن سرنخ با کارت‌های تصویری سورئال.\" },\n  { id: 6, title_fa: \"گربه‌های انفجاری\", min_players: 2, max_players: 5, duration: 15, complexity: \"بسیار ساده\", categories: [\"کارتی\", \"دورهمی\", \"شانسی\"], description: \"رولت روسی با چاشنی گربه و کارت‌های خنثی‌کننده.\" },\n  { id: 7, title_fa: \"پچ‌ورک\", min_players: 2, max_players: 2, duration: 30, complexity: \"متوسط\", categories: [\"دو نفره\", \"انتزاعی\", \"پازل\"], description: \"دوختن پتو با خرید قطعات پارچه تتریس‌مانند.\" },\n  { id: 8, title_fa: \"کودتا\", min_players: 2, max_players: 6, duration: 15, complexity: \"ساده\", categories: [\"دورهمی\", \"بلوف‌زنی\", \"کارتی\"], description: \"حذف رقبا با استفاده از نفوذ و بلوف در فضای سایبرپانک.\" },\n  { id: 9, title_fa: \"پندمیک\", min_players: 2, max_players: 4, duration: 45, complexity: \"سخت\", categories: [\"همکاری مشترک\", \"استراتژیک\"], description: \"همکاری متخصصان برای نجات دنیا از شیوع ۴ ویروس کشنده.\" },\n  { id: 10, title_fa: \"تیکت تو راید\", min_players: 2, max_players: 5, duration: 60, complexity: \"ساده\", categories: [\"خانوادگی\", \"استراتژیک\"], description: \"ساخت مسیرهای راه‌آهن بین شهرها با جمع‌آوری کارت‌های رنگی.\" }\n];\n\n// Combine the incoming Webhook data (User's Answers) with the Game Database\nconst incomingData = $input.first().json.body || $input.first().json.query || {};\n\nreturn [\n  {\n    json: {\n      user_preferences: incomingData,\n      database: gamesDB\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        176
+      ],
+      "id": "47427906-a48c-48fb-88d3-ac6f1d54f759",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json.user_preferences) }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=تو یک گیم‌مستر حرفه‌ای در کافه‌بازی فکرکده هستی. وظیفه تو این است که منطقی‌ترین پیشنهادها را با بررسی دقیق و وسواس‌گونه تطبیق دهی.\n\nراهنمای تحلیل کلیدهای کاربر:\n- گروه (group): اگر duo بود یعنی بازی باید دقیقا برای 2 نفر مناسب باشد. close یعنی 3-4 نفر. crowd یعنی 5 نفر به بالا. mixed یعنی بازی خانوادگی/ساده.\n- انرژی (energy): 1 یعنی بازی ساده و سبک، 2 یعنی متوسط، 3 یعنی استراتژیک و سخت.\n- زمان (time): عدد ارسالی نشان‌دهنده حداکثر زمان به دقیقه است.\n- حس و حال (mood): laugh یعنی خنده‌دار/دورهمی، compete یعنی رقابتی، coop یعنی همکاری، chill یعنی آرام.\n\nپاسخ‌های کاربر:\n{{ JSON.stringify($json.user_preferences) }}\n\nدیتابیس بازی‌های ما:\n{{ JSON.stringify($json.database) }}\n\nبا توجه به این راهنما، ۳ بازی که بیشترین تطابق منطقی را دارند انتخاب کن و برای هر کدام یک درصد تطابق واقعی (مثلاً 92 یا 85) محاسبه کن.\nخروجی باید فقط و فقط یک آرایه JSON به شکل زیر باشد و هیچ متن اضافه‌ای نداشته باشد:\n[\n  {\n    \"title\": \"نام بازی\",\n    \"reason\": \"دلیل منطقی پیشنهاد تو بر اساس تطابق با جواب‌های کاربر...\",\n    \"match_percentage\": 92\n  }\n]"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        112,
+        176
+      ],
+      "id": "2cb01ca1-2133-4386-93f2-301ee235f4a5",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        112,
+        400
+      ],
+      "id": "0ff0de52-1808-4d2b-bbcd-c965fa470b4a",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Ed7ZjO5AcOqeUH1a",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.parse($json.text) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        176
+      ],
+      "id": "242e45ad-e9f7-4f1c-bd24-06fcbe82fcdd",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "# 🎲 AI-Powered Game Master \n\n### 📌 Architecture Overview\nThis workflow acts as the backend intelligence for the \"Fekrkade\" board game recommendation system. It bridges a modern Single Page Application (SPA) frontend with LLM-based reasoning via a decoupled webhook architecture.\n\n---\n\n### 🔄 Workflow Steps:\n1. **Webhook Trigger (POST):** \n   - Receives raw user preference payloads (group size, energy/complexity, mood, and time limits) sent asynchronously from the frontend interface.\n   - Configured with CORS enabled to safely accept incoming browser requests.\n\n2. **Code Node (Mock Database & Payload Prep):** \n   - Injects a structured JSON database of curated board games containing metadata (player counts, duration, complexity, categories).\n   - Merges incoming user criteria with the game database into a unified data payload for downstream LLM processing.\n\n3. **Basic LLM Chain & OpenRouter Integration:** \n   - Powered by an advanced language model via OpenRouter.\n   - Utilizes a specialized prompt to filter and rank the top 3 best-matching games based on logical constraints.\n   - Forces strict, deterministic JSON output formatting containing match percentages and tailored game-master justifications.\n\n4. **Respond to Webhook:** \n   - Transforms the parsed LLM text string into a clean, valid JSON array and transmits the final recommendation payload back to the browser.",
+        "height": 880,
+        "width": 1072,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -336
+      ],
+      "id": "dfca8487-4c74-42d5-8cb5-07a38895ddb8",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "355f885a-cb03-4f5c-a8df-b8a822d1d332",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e2fe44d912cff8baade04deeae5fab81664f14d3b906c4d802bf55064b6ae86"
+  },
+  "nodeGroups": [],
+  "id": "BwR7HFhV1O4Sexuw",
+  "tags": []
+}

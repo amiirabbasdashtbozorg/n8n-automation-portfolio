@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>گیم‌مستر — همراه هوشمند کافه بوردگیم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E8EEE9;--surf:#F7FAF6;--surf2:#DCE6DF;--ink:#13211D;--mute:#4A625B;--line:#C3D1C8;
+  --felt:#1E4D42;--felt2:#2E6B5B;--on-felt:#F2F7F3;--brass:#B8862B;--coral:#D4533C;--sky:#2F86A8;--plum:#7A4B8C;
+  --sq1:#EEF3EE;--sq2:#D5E3DA;--shadow:0 1px 0 rgba(19,33,29,.06),0 8px 24px -12px rgba(19,33,29,.25);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1A17;--surf:#162622;--surf2:#1E332D;--ink:#E4EEE8;--mute:#9FB5AD;--line:#2B433B;
+    --felt:#2F7B68;--felt2:#3B917B;--on-felt:#F4FAF6;--brass:#D8A74A;--coral:#EE7A63;--sky:#58B0D2;--plum:#B27FC4;
+    --sq1:#1B2E29;--sq2:#223A33;--shadow:0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1A17;--surf:#162622;--surf2:#1E332D;--ink:#E4EEE8;--mute:#9FB5AD;--line:#2B433B;
+  --felt:#2F7B68;--felt2:#3B917B;--on-felt:#F4FAF6;--brass:#D8A74A;--coral:#EE7A63;--sky:#58B0D2;--plum:#B27FC4;
+  --sq1:#1B2E29;--sq2:#223A33;--shadow:0 8px 24px -12px rgba(0,0,0,.6);
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.8 Vazirmatn,Tahoma,sans-serif;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:6px}
+h1,h2,h3,h4{margin:0;line-height:1.35}
+.display{font-family:Lalezar,Vazirmatn,sans-serif;font-weight:400;letter-spacing:0}
+p{margin:0}
+
+/* header + nav */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:auto;display:flex;align-items:center;gap:16px;padding:10px 20px}
+.brand{display:flex;align-items:center;gap:10px;margin-inline-end:auto;border:0;background:none;padding:0;text-align:right}
+.brand-mark{width:38px;height:38px;border-radius:11px;background:var(--felt);display:grid;place-items:center}
+.brand b{font:400 24px/1 Lalezar,sans-serif;display:block}
+.brand small{display:block;color:var(--mute);font-size:12px;line-height:1.4}
+.nav{display:flex;gap:4px}
+.nav button{border:0;background:none;padding:8px 14px;border-radius:999px;color:var(--mute);font-weight:500;display:flex;gap:7px;align-items:center}
+.nav button svg{width:18px;height:18px;flex:none}
+.nav button[aria-current="page"]{background:var(--felt);color:var(--on-felt)}
+.nav button:not([aria-current="page"]):hover{background:var(--surf2);color:var(--ink)}
+.icon-btn{border:1px solid var(--line);background:var(--surf);width:38px;height:38px;border-radius:50%;display:grid;place-items:center}
+@media (max-width:760px){
+  .top-in{padding:8px 14px}
+  .brand small{display:none}
+  .nav{position:fixed;inset-inline:0;bottom:0;z-index:40;background:var(--surf);border-top:1px solid var(--line);justify-content:space-around;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));gap:0}
+  .nav button{flex-direction:column;gap:2px;font-size:11px;padding:6px 8px;border-radius:12px;line-height:1.4}
+}
+main{max-width:1180px;margin:auto;padding:22px 20px 60px}
+@media (max-width:760px){main{padding:16px 14px 110px}}
+.view{animation:in .25s ease}
+@keyframes in{from{opacity:.0}to{opacity:1}}
+
+/* shared */
+.btn{border:0;border-radius:14px;padding:11px 20px;font-weight:700;background:var(--felt);color:var(--on-felt);display:inline-flex;gap:8px;align-items:center;justify-content:center;transition:transform .12s,background .15s}
+.btn:hover{background:var(--felt2)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost:hover{background:var(--surf2)}
+.btn.brass{background:var(--brass);color:#1c1405}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surf);border-radius:999px;padding:3px 12px;font-size:13px;color:var(--mute)}
+.chip.on,button.chip[aria-pressed="true"]{background:var(--felt);color:var(--on-felt);border-color:var(--felt)}
+button.chip{cursor:pointer;font-weight:500}
+.muted{color:var(--mute)}
+.sec-title{font:400 28px/1.3 Lalezar,sans-serif;margin-bottom:6px}
+.pips{letter-spacing:2px;color:var(--brass)}
+
+/* catalog */
+.hero{background:var(--felt);color:var(--on-felt);border-radius:28px;padding:38px 36px;position:relative;overflow:hidden;display:grid;gap:14px;
+  background-image:linear-gradient(45deg,rgba(255,255,255,.045) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.045) 75%),linear-gradient(45deg,rgba(255,255,255,.045) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.045) 75%);
+  background-size:56px 56px;background-position:0 0,28px 28px}
+.hero h1{font:400 clamp(34px,6vw,58px)/1.2 Lalezar,sans-serif;max-width:14ch}
+.hero p{max-width:46ch;opacity:.92}
+.hero .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.hero .btn.ghost{color:var(--on-felt);border-color:rgba(255,255,255,.45)}
+.hero .btn.ghost:hover{background:rgba(255,255,255,.12)}
+.hero .btn.solid{background:var(--on-felt);color:var(--felt)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:26px 0 14px}
+.search{flex:1;min-width:180px;border:1.5px solid var(--line);background:var(--surf);border-radius:14px;padding:9px 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.gcard{text-align:right;background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:18px;display:grid;gap:8px;transition:transform .15s,border-color .15s;min-height:170px;align-content:start}
+.gcard:hover{transform:translateY(-3px);border-color:var(--felt2)}
+.gcard.ready{border:2px solid var(--felt2)}
+.gcard.soon{opacity:.62}
+.gcard h3{font:400 26px/1.3 Lalezar,sans-serif}
+.gcard .meta{display:flex;gap:12px;flex-wrap:wrap;color:var(--mute);font-size:14px}
+.badge{justify-self:start;font-size:12px;font-weight:700;border-radius:999px;padding:1px 10px;background:var(--surf2);color:var(--mute)}
+.badge.live{background:var(--brass);color:#1c1405}
+
+/* detail */
+.crumb{border:0;background:none;color:var(--mute);padding:0;margin-bottom:12px;font-weight:500}
+.detail{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+@media (max-width:900px){.detail{grid-template-columns:1fr}}
+.video{background:var(--felt);color:var(--on-felt);border-radius:22px;overflow:hidden;display:grid}
+.stage{padding:26px;display:grid;grid-template-columns:130px 1fr;gap:20px;align-items:center;min-height:210px}
+.stage svg{width:130px;height:130px}
+.stage h3{font:400 28px/1.3 Lalezar,sans-serif;margin-bottom:4px}
+.vbar{display:flex;gap:6px;align-items:center;padding:12px 18px;background:rgba(0,0,0,.18)}
+.vbar button{border:0;background:rgba(255,255,255,.14);color:var(--on-felt);width:34px;height:34px;border-radius:50%;display:grid;place-items:center}
+.vbar .track{flex:1;display:flex;gap:4px}
+.vbar .seg{flex:1;height:5px;background:rgba(255,255,255,.22);border-radius:3px;overflow:hidden}
+.vbar .seg i{display:block;height:100%;width:0;background:var(--on-felt)}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+.fact{background:var(--surf2);border-radius:14px;padding:10px 14px}
+.fact b{display:block;font-size:18px}
+.fact span{font-size:13px;color:var(--mute)}
+.tables{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.tbtn{border:1.5px solid var(--line);background:var(--surf);border-radius:14px;padding:8px 14px;min-width:78px;text-align:center;line-height:1.4}
+.tbtn small{display:block;color:var(--mute);font-size:12px}
+.tbtn[aria-pressed="true"]{border-color:var(--felt2);background:var(--felt);color:var(--on-felt)}
+.tbtn[aria-pressed="true"] small{color:var(--on-felt)}
+.tbtn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* recommender */
+.rec{max-width:760px;margin:auto}
+.prog{display:flex;gap:6px;margin:12px 0 22px}
+.prog i{flex:1;height:6px;border-radius:3px;background:var(--surf2)}
+.prog i.done{background:var(--felt2)}
+.prog i.cur{background:var(--brass)}
+.qtitle{font:400 clamp(26px,4.4vw,38px)/1.4 Lalezar,sans-serif;margin-bottom:14px}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (max-width:560px){.opts{grid-template-columns:1fr}}
+.opt-tile{text-align:right;background:var(--surf);border:1.5px solid var(--line);border-radius:18px;padding:16px 18px;border-inline-start:6px solid var(--felt2);transition:transform .12s,border-color .15s}
+.opt-tile b{display:block;font-size:18px}
+.opt-tile span{color:var(--mute);font-size:14px}
+.opt-tile:hover{transform:translateY(-2px);border-color:var(--felt2)}
+.opt-tile[aria-pressed="true"]{background:var(--felt);color:var(--on-felt);border-color:var(--felt)}
+.opt-tile[aria-pressed="true"] span{color:var(--on-felt)}
+details.why{margin-top:16px;color:var(--mute);font-size:14px}
+details.why summary{cursor:pointer;font-weight:500}
+.rec-actions{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+.winner{display:grid;grid-template-columns:150px 1fr;gap:22px;align-items:center}
+@media (max-width:560px){.winner{grid-template-columns:1fr;justify-items:center;text-align:center}}
+.ring{--p:0;width:150px;height:150px;border-radius:50%;background:conic-gradient(var(--brass) calc(var(--p)*1%),var(--surf2) 0);display:grid;place-items:center;transition:--p 1s}
+.ring div{width:118px;height:118px;border-radius:50%;background:var(--surf);display:grid;place-items:center;font:400 40px/1 Lalezar,sans-serif}
+.ring small{display:block;font:400 12px/1 Vazirmatn,sans-serif;color:var(--mute);text-align:center;margin-top:4px}
+.reasons{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:4px}
+.reasons li::before{content:"✓";color:var(--felt2);font-weight:800;margin-inline-end:8px}
+.others{display:grid;gap:8px;margin-top:16px}
+.orow{display:grid;grid-template-columns:110px 1fr 46px;align-items:center;gap:10px;border:0;background:none;text-align:right;padding:6px 0}
+.bar{height:10px;border-radius:5px;background:var(--surf2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--felt2);border-radius:5px}
+.pair{margin-top:12px;background:var(--surf2);border-radius:14px;padding:10px 14px;font-size:14px}
+
+/* play */
+.setup{max-width:640px;margin:auto;display:grid;gap:16px}
+.setup h2{font:400 32px/1.3 Lalezar,sans-serif}
+.seg-pick{display:flex;gap:8px}
+.names{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.names input,.field{border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:8px 12px;width:100%}
+.rules{display:grid;gap:8px}
+.rules fieldset{border:1px solid var(--line);border-radius:14px;padding:8px 14px 10px;margin:0}
+.rules legend{font-size:13px;color:var(--mute);padding:0 6px}
+.opt{display:flex;gap:10px;align-items:center;padding:4px 0;cursor:pointer}
+.opt input{accent-color:var(--felt2);width:18px;height:18px}
+.play{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+@media (max-width:980px){.play{grid-template-columns:1fr}}
+.board-wrap{position:relative;aspect-ratio:1;margin-bottom:44px;max-width:680px;width:100%;margin-inline:auto}
+.board{position:absolute;inset:0;display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr);direction:ltr;border-radius:14px;overflow:hidden;border:3px solid var(--felt);box-shadow:var(--shadow)}
+.sq{background:var(--sq1);font-size:clamp(8px,1.5vw,12px);color:var(--mute);padding:2px 4px;line-height:1.3;font-weight:500}
+.sq.alt{background:var(--sq2)}
+.sq.goal{background:var(--brass);color:#1c1405;font-weight:800}
+.sq.begin{background:var(--felt2);color:var(--on-felt)}
+.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;direction:ltr}
+.tokens{position:absolute;inset:0;direction:ltr;pointer-events:none}
+.tok{position:absolute;width:5.4%;aspect-ratio:1;border-radius:50%;background:var(--c);transform:translate(-50%,-50%);transition:left .18s ease,top .18s ease;display:grid;place-items:center;color:#fff;font-weight:800;font-size:clamp(9px,1.6vw,13px);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);z-index:2}
+.tok.cur{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 40%,transparent)}}
+.tray{position:absolute;inset-inline-start:0;bottom:-38px;font-size:12px;color:var(--mute);direction:rtl}
+.panel{display:grid;gap:14px}
+.turnbox{display:flex;gap:12px;align-items:center}
+.dot{width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.die{width:84px;height:84px;border-radius:20px;background:#fff;border:2px solid var(--line);display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:12px;gap:2px;box-shadow:0 6px 0 var(--line)}
+.die i{border-radius:50%;background:#14211D;opacity:0;width:100%;height:100%}
+.die i.on{opacity:1}
+.die.rolling{animation:shake .5s linear infinite}
+@keyframes shake{25%{transform:rotate(-10deg) translateY(-3px)}75%{transform:rotate(10deg) translateY(-3px)}}
+.rollrow{display:flex;gap:14px;align-items:center}
+.manual{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--mute)}
+.manual button{width:34px;height:34px;border-radius:10px;border:1.5px solid var(--line);background:var(--surf);font-weight:700}
+.manual button:hover{background:var(--surf2)}
+.log{max-height:210px;overflow:auto;display:grid;gap:4px;font-size:14px;list-style:none;padding:0;margin:0}
+.log li{padding:2px 0;border-bottom:1px dashed var(--line)}
+.plist{display:grid;gap:6px}
+.prow{display:flex;gap:10px;align-items:center}
+.prow span:last-child{margin-inline-start:auto;color:var(--mute);font-size:14px}
+.win{background:var(--brass);color:#1c1405;border-radius:16px;padding:14px 16px;font-weight:700}
+
+/* chat */
+.chat{display:flex;flex-direction:column;background:var(--surf);border:1px solid var(--line);border-radius:22px;overflow:hidden;height:100%;min-height:0}
+.chat-head{padding:12px 16px;background:var(--felt);color:var(--on-felt);display:grid;gap:2px}
+.chat-head b{font:400 20px/1.3 Lalezar,sans-serif}
+.chat-head small{opacity:.9;font-size:12.5px;line-height:1.5}
+.msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.msg{max-width:88%;padding:10px 14px;border-radius:16px;line-height:1.8;font-size:15px}
+.msg.ai{background:var(--surf2);border-end-start-radius:4px;align-self:flex-start}
+.msg.me{background:var(--felt);color:var(--on-felt);border-end-end-radius:4px;align-self:flex-end}
+.msg .ref{display:block;margin-top:6px;padding-top:6px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mute)}
+.typing{display:flex;gap:4px;padding:14px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--mute);animation:blink 1s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+.sugg{display:flex;gap:6px;overflow-x:auto;padding:4px 12px 8px}
+.sugg button{flex:none}
+.ask{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.ask input{flex:1;border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:8px 12px;min-width:0}
+.ctx{margin:0 12px 6px;font-size:12.5px;color:var(--mute)}
+.assist{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:stretch}
+@media (max-width:900px){.assist{grid-template-columns:1fr}}
+.assist-chat{height:min(680px,calc(100vh - 160px));min-height:480px}
+@media (max-width:900px){.assist-chat{height:560px}}
+.side{display:grid;gap:14px;align-content:start}
+.feature{display:grid;grid-template-columns:34px 1fr;gap:10px}
+.feature i{width:34px;height:34px;border-radius:10px;background:var(--surf2);display:grid;place-items:center;font-style:normal}
+.challenge{background:var(--felt);color:var(--on-felt);border:0}
+.challenge .btn{background:var(--on-felt);color:var(--felt)}
+
+/* drawer + fab */
+.fab{position:fixed;inset-inline-start:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:35;border:0;background:var(--brass);color:#1c1405;border-radius:999px;padding:12px 18px;font-weight:800;display:flex;gap:8px;align-items:center;box-shadow:0 10px 24px -8px rgba(0,0,0,.45)}
+@media (max-width:760px){.fab{bottom:calc(78px + env(safe-area-inset-bottom,0px))}}
+.drawer{position:fixed;inset-inline-start:18px;bottom:18px;width:400px;height:min(620px,calc(100vh - 110px));z-index:50;display:none;filter:drop-shadow(0 18px 40px rgba(0,0,0,.35))}
+.drawer.on{display:block}
+.drawer .x{position:absolute;top:10px;inset-inline-end:12px;z-index:3;border:0;background:rgba(255,255,255,.18);color:var(--on-felt);width:30px;height:30px;border-radius:50%}
+@media (max-width:760px){.drawer{inset:0;width:auto;height:auto;padding-top:env(safe-area-inset-top,0px);background:var(--bg)}}
+
+/* owner */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
+.stat b{font:400 38px/1.1 Lalezar,sans-serif;display:block}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+.feedlist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px;font-size:14.5px}
+.feedlist li{display:flex;gap:10px}
+.feedlist time{color:var(--mute);flex:none;min-width:48px}
+.road{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:12px}
+.road .card{padding:16px;box-shadow:none}
+.road h4{font-size:16px;margin-bottom:4px}
+.road p{color:var(--mute);font-size:14px}
+.empty{color:var(--mute);padding:14px;border:1.5px dashed var(--line);border-radius:14px;margin-top:10px}
+
+.toast{position:fixed;inset-inline:0;margin:auto;width:max-content;max-width:90vw;bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:14px;z-index:80;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <button class="brand" data-act="nav" data-v="catalog" aria-label="صفحه اصلی">
+      <span class="brand-mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" fill="#F2F7F3"/><circle cx="8.5" cy="8.5" r="1.6" fill="#1E4D42"/><circle cx="15.5" cy="15.5" r="1.6" fill="#1E4D42"/><circle cx="15.5" cy="8.5" r="1.6" fill="#1E4D42"/><circle cx="8.5" cy="15.5" r="1.6" fill="#1E4D42"/></svg></span>
+      <span><b>گیم‌مستر</b><small>نمونه اولیه </small></span>
+    </button>
+    <nav class="nav" aria-label="بخش‌های برنامه">
+      <button data-nav="catalog" data-act="nav" data-v="catalog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>کاتالوگ</button>
+      <button data-nav="rec" data-act="nav" data-v="rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.1 5.4L20 9.3l-4.4 3.8L17 19l-5-3-5 3 1.4-5.9L4 9.3l5.9-.9z"/></svg>پیشنهاد هوشمند</button>
+      <button data-nav="assistant" data-act="nav" data-v="assistant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/></svg>داور هوشمند</button>
+      <button data-nav="owner" data-act="nav" data-v="owner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>پنل کافه</button>
+    </nav>
+    <button class="icon-btn" data-act="theme" aria-label="تغییر تم روشن/تیره" title="تغییر تم"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
+  </div>
+</header>
+
+<main>
+  <section class="view" id="v-catalog"></section>
+  <section class="view" id="v-detail" hidden></section>
+  <section class="view" id="v-rec" hidden></section>
+  <section class="view" id="v-assistant" hidden>
+    <div class="assist">
+      <div class="assist-chat" id="assistantSlot"></div>
+      <div class="side">
+        <div class="card challenge">
+          <h3 class="display" style="font-size:24px">یک سؤال چالشی را امتحان کنید</h3>
+          <p style="margin:6px 0 12px;opacity:.92">«روی خانه ۹۷ هستم و ۶ آوردم؛ برنده‌ام؟» — جواب به قانون پایانِ انتخاب‌شدهٔ همین میز بستگی دارد. قانون را عوض کنید و دوباره بپرسید.</p>
+          <button class="btn" data-act="chip" data-q="روی خانه ۹۷ هستم و ۶ آوردم؛ برنده‌ام؟">بپرس از داور</button>
+        </div>
+        <div class="card">
+          <h3 style="font-size:17px;margin-bottom:8px">قوانین فعال این میز</h3>
+          <div data-rules></div>
+        </div>
+        <div class="card">
+          <div class="feature"><i>1</i><div><b>جواب مشخص، با مرجع</b><p class="muted" style="font-size:14px">هر پاسخ می‌گوید بر کدام قانون بنا شده است.</p></div></div>
+          <div class="feature" style="margin-top:10px"><i>2</i><div><b>مهره‌ها را می‌بیند</b><p class="muted" style="font-size:14px">اگر بازی روی میز جریان داشته باشد، نوبت و موقعیت‌ها را در پاسخ می‌آورد.</p></div></div>
+          <div class="feature" style="margin-top:10px"><i>3</i><div><b>جایی که نمی‌داند، حدس نمی‌زند</b><p class="muted" style="font-size:14px">پیش‌خدمت سالن را صدا می‌زند.</p></div></div>
+          <p class="muted" style="font-size:12.5px;margin-top:12px">در این نمونه پاسخ‌ها از موتور قوانین داخلی می‌آید؛ در نسخه نهایی همین رابط به مدل زبانی متصل می‌شود.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="view" id="v-owner" hidden></section>
+</main>
+
+<button class="fab" id="fab" data-act="drawer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/></svg>داور هوشمند</button>
+<div class="drawer" id="drawer"><button class="x" data-act="drawer-close" aria-label="بستن">✕</button><div id="drawerSlot" style="height:100%"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,RM?0:ms));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const range=(a,b)=>{const r=[];for(let i=a;i<=b;i++)r.push(i);return r;};
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2600);}
+
+/* ---------- data ---------- */
+const GAMES=[
+ {id:'snakes',name:'مار و پله',ready:true,tag:'کلاسیک خانوادگی',players:[2,6],time:20,cx:1,newbie:1,tone:{laugh:.9,compete:.35,coop:.2,chill:.85},
+  pair:'چای دارچین و کیک هویج',desc:'مسیر ۱۰۰ خانه‌ای که شانس در آن تعیین می‌کند چه کسی بالا برود و چه کسی لیز بخورد. قوانین در یک دقیقه یاد گرفته می‌شود و هر دور ماجرای تازه‌ای دارد؛ برای جمع‌های مختلط، خانواده‌ها و شروع یک شب بازی ایده‌آل است.'},
+ {id:'jenga',name:'جنگا',tag:'مهارت و هیجان',players:[2,8],time:20,cx:1,newbie:.9,tone:{laugh:.9,compete:.55,coop:.1,chill:.5}},
+ {id:'dixit',name:'دیکسیت',tag:'تخیل و قصه‌گویی',players:[3,6],time:35,cx:2,newbie:.8,tone:{laugh:.5,compete:.3,coop:.3,chill:.8}},
+ {id:'codenames',name:'کدنیمز',tag:'کلمه و تیم',players:[4,10],time:25,cx:2,newbie:.7,tone:{laugh:.6,compete:.65,coop:.6,chill:.3}},
+ {id:'mafia',name:'مافیا',tag:'بلوف و گفت‌وگو',players:[6,12],time:45,cx:2,newbie:.5,tone:{laugh:.75,compete:.7,coop:.3,chill:.2}},
+ {id:'catan',name:'کاتان',tag:'استراتژی و معامله',players:[3,4],time:90,cx:3,newbie:.3,tone:{laugh:.3,compete:1,coop:.1,chill:.2}},
+ {id:'pandemic',name:'پاندمیک',tag:'همکاری تیمی',players:[2,4],time:60,cx:3,newbie:.3,tone:{laugh:.2,compete:.2,coop:1,chill:.3}}
+];
+const MOODS={laugh:'خنده و شلوغ‌بازی',compete:'رقابت و برد',coop:'همکاری تیمی',chill:'آرامش و گپ'};
+const QUESTIONS=[
+ {k:'mood',q:'امشب دلتان چه حال‌وهوایی می‌خواهد؟',
+  why:'«حال‌وهوا» تعیین می‌کند بازی باید چه حسی بسازد: همکاری و رقابت دو قطب مخالف‌اند و خنده با آرامش فرق دارد. با همین یک سؤال، حدود نیمی از کاتالوگ کنار می‌رود.',
+  opts:[{v:'laugh',t:'خنده و شلوغ‌بازی',d:'می‌خواهیم صدای خنده از میز بلند شود'},{v:'compete',t:'رقابت و برد',d:'یک نفر باید برنده شود، و من هستم'},{v:'coop',t:'همکاری تیمی',d:'همه با هم، در برابر خودِ بازی'},{v:'chill',t:'آرامش و گپ',d:'بازی بهانه‌ای برای حرف زدن است'}]},
+ {k:'energy',q:'باتری ذهن‌تان چند درصد است؟',
+  why:'به‌جای پرسیدن «بازی سخت می‌خواهید؟»، از انرژی می‌پرسیم؛ آدم‌ها دربارهٔ حال خودشان صادق‌ترند. جواب مستقیم به پیچیدگی قوانین و بار شناختی بازی نگاشت می‌شود.',
+  opts:[{v:1,t:'کم',d:'قوانین ساده، فکر کم'},{v:2,t:'متوسط',d:'کمی تفکر، اما نه زیاد'},{v:3,t:'پر',d:'آماده‌ی برنامه‌ریزی و استراتژی'}]},
+ {k:'group',q:'چند نفرید و چه رابطه‌ای دارید؟',
+  why:'تعداد نفرات یک فیلتر سخت است (بازی ۳ تا ۴ نفره برای ۸ نفر جواب نمی‌دهد). رابطه‌ی اعضا هم تعیین می‌کند بازی چقدر باید برای تازه‌وارد و غریبه‌ها قابل‌فهم باشد.',
+  opts:[{v:'duo',t:'دو نفر، صمیمی',d:'قرار دونفره'},{v:'close',t:'۳ تا ۴ دوست نزدیک',d:'همه یکدیگر را می‌شناسیم'},{v:'crowd',t:'جمع شلوغ، ۵ نفر یا بیشتر',d:'شلوغ و پرحرف'},{v:'mixed',t:'جمع مختلط',d:'تازه‌وارد یا بچه هم داریم'}]},
+ {k:'time',q:'تا کی وقت دارید؟',
+  why:'زمان، آخرین فیلتر سخت است و برای کافه هم ارزش اقتصادی دارد: بازی‌ای که در وقت مشتری تمام نشود، تجربهٔ ناتمام می‌سازد.',
+  opts:[{v:20,t:'حدود ۲۰ دقیقه',d:'یک دور سریع'},{v:45,t:'حدود ۴۵ دقیقه',d:'یک دور کامل'},{v:90,t:'یک ساعت و نیم',d:'بازی اصلی شب'},{v:180,t:'تا کافه ما را بیرون کند',d:'وقت آزاد'}]}
+];
+const GROUP_MAP={duo:{n:2,newbie:0},close:{n:4,newbie:0},crowd:{n:7,newbie:0},mixed:{n:4,newbie:1}};
+const LADDERS=[[1,38],[4,14],[9,31],[21,42],[28,84],[36,44],[51,67],[71,91],[80,100]];
+const SNAKES=[[16,6],[47,26],[49,11],[56,53],[62,19],[64,60],[87,24],[93,73],[95,75],[98,78]];
+const TR={};LADDERS.forEach(([a,b])=>TR[a]={to:b,type:'ladder'});SNAKES.forEach(([a,b])=>TR[a]={to:b,type:'snake'});
+const COLORS=['#C2452F','#2478A0','#8A5C0C','#7A4B8C'];
+const TABLES=[{n:3,busy:false},{n:5,busy:true},{n:7,busy:false},{n:9,busy:true},{n:12,busy:false}];
+const ROADMAP=[
+ ['منوی جفت‌شده با بازی','بعد از انتخاب بازی، نوشیدنی و خوراکی مناسب همان بازی پیشنهاد می‌شود و به سفارش میز اضافه می‌شود.'],
+ ['صف انتظار هوشمند','اگر میز پر است، مشتری در صف می‌ماند و وقتی میز آزاد شد خبر می‌گیرد.'],
+ ['باشگاه و امتیاز','هر بازی تمام‌شده امتیاز می‌دهد؛ مشتری برگشتنی با یک ماه ورود رایگان تشویق می‌شود.'],
+ ['گزارش اختلاف‌ها','پرسیده‌شده‌ترین سؤال‌های قانونی هفته، نشان می‌دهد کدام بازی به آموزش بهتر نیاز دارد.'],
+ ['آموزش با بازی‌یار','اگر مشتری بازی را بلد نبود، با یک لمس پیش‌خدمت آموزش‌دیده را صدا می‌زند.'],
+ ['خرید بازی','بازی‌های پرفروش کافه از داخل برنامه سفارش داده می‌شود.']
+];
+
+/* ---------- state ---------- */
+const R={finish:'exact',six:true};
+const S={view:'catalog',filter:'all',q:'',qi:0,ans:{},stats:{recs:0,ai:0,plays:0,staff:0},feed:[],qlog:[],moods:{},table:null,drawer:false,setup:{n:2,names:['','','','']},play:null,scene:0,playing:true,chatBusy:false};
+
+function feed(txt){S.feed.unshift({t:new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'}),txt});S.feed=S.feed.slice(0,10);if(S.view==='owner')renderOwner();}
+
+/* ---------- navigation ---------- */
+const chatEl=document.createElement('section');chatEl.className='chat';chatEl.id='chat';
+function mount(slot){slot.appendChild(chatEl);const m=$('#msgs');if(m)m.scrollTop=m.scrollHeight;}
+function go(v){
+  S.view=v;
+  $$('.view').forEach(e=>e.hidden=e.id!=='v-'+v);
+  $$('[data-nav]').forEach(b=>b.setAttribute('aria-current',b.dataset.nav===(v==='detail'?'catalog':v)?'page':'false'));
+  if(v==='assistant'){closeDrawer();mount($('#assistantSlot'));}
+  else if(S.drawer)mount($('#drawerSlot'));
+  $('#fab').hidden=v==='assistant'||S.drawer;
+  if(v==='owner')renderOwner();
+  if(v==='detail')startVideo();else stopVideo();
+  window.scrollTo(0,0);
+}
+function openDrawer(){S.drawer=true;$('#drawer').classList.add('on');mount($('#drawerSlot'));$('#fab').hidden=true;updateChatHead();}
+function closeDrawer(){S.drawer=false;$('#drawer').classList.remove('on');$('#fab').hidden=S.view==='assistant';}
+
+/* ---------- catalog ---------- */
+const FILTERS=[['all','همه'],['chill','آرام و گپ'],['laugh','خنده'],['compete','رقابتی'],['coop','همکاری']];
+function renderCatalog(){
+  const list=GAMES.filter(g=>(S.filter==='all'||g.tone[S.filter]>=.6)&&(!S.q||g.name.includes(S.q.trim())||g.tag.includes(S.q.trim())));
+  $('#v-catalog').innerHTML=`
+  <div class="hero">
+    <h1>امشب چی بازی کنیم؟</h1>
+    <p>چهار سؤال کوتاه دربارهٔ حال‌وهوا، انرژی، جمع و وقت‌تان؛ باقیِ کار با گیم‌مستر. وسط بازی هم داور هوشمند کنار میز است.</p>
+    <div class="row">
+      <button class="btn solid" data-act="nav" data-v="rec">شروع پیشنهاد هوشمند</button>
+      <button class="btn ghost" data-act="open" data-id="snakes">دیدن بازی نمونه: مار و پله</button>
+    </div>
+  </div>
+  <div class="tools">
+    <input class="search" id="gsearch" type="search" placeholder="جست‌وجوی بازی" value="${esc(S.q)}" aria-label="جست‌وجوی بازی">
+    ${FILTERS.map(([k,t])=>`<button class="chip" aria-pressed="${S.filter===k}" data-act="filter" data-k="${k}">${t}</button>`).join('')}
+  </div>
+  <div class="grid">${list.length?list.map(gcard).join(''):'<div class="empty">بازی‌ای با این فیلتر پیدا نشد. فیلتر «همه» را بزنید.</div>'}</div>
+  <p class="muted" style="margin-top:14px;font-size:14px">در نسخهٔ نمونه فقط «مار و پله» صفحهٔ کامل دارد؛ بقیه برای نشان دادن کاتالوگ و موتور پیشنهاد اضافه شده‌اند.</p>`;
+}
+function gcard(g){
+  return `<button class="gcard ${g.ready?'ready':'soon'}" data-act="open" data-id="${g.id}">
+   <span class="badge ${g.ready?'live':''}">${g.ready?'صفحه کامل در نمونه':'نسخه کامل'}</span>
+   <h3>${g.name}</h3><span class="muted">${g.tag}</span>
+   <div class="meta"><span>${fa(g.players[0])}–${fa(g.players[1])} نفر</span><span>${fa(g.time)} دقیقه</span><span class="pips" title="پیچیدگی">${'●'.repeat(g.cx)}${'○'.repeat(3-g.cx)}</span></div></button>`;
+}
+
+/* ---------- detail + video ---------- */
+function scenes(){return [
+ {t:'تاس را بیندازید',d:'هر بازیکن به نوبت تاس می‌اندازد و مهره‌اش را به همان تعداد خانه جلو می‌برد.',i:'die'},
+ {t:'نردبان؛ میان‌بر',d:'اگر روی پایین نردبان بایستید، به بالای آن می‌روید. این حرکت اجباری است.',i:'ladder'},
+ {t:'مار؛ سقوط',d:'روی سر مار بایستید و تا دُمش پایین می‌لغزید. عبور از کنار مار اثری ندارد.',i:'snake'},
+ {t:R.six?'عدد ۶، نوبت اضافه':'عدد ۶ مثل بقیه',d:R.six?'با ۶ دوباره تاس می‌اندازید؛ سومین ۶ پشت‌سرهم حساب نمی‌شود.':'قانون این میز نوبت اضافه ندارد.',i:'six'},
+ {t:'خانهٔ ۱۰۰',d:{exact:'برای برد باید با عدد دقیق به ۱۰۰ برسید.',bounce:'اگر عدد از ۱۰۰ بیشتر شد، باقیِ خانه‌ها را به عقب برمی‌گردید.',over:'با هر عدد برابر یا بزرگ‌تر از فاصله، برنده‌اید.'}[R.finish],i:'flag'}];}
+function art(i){
+  const st='fill="none" stroke="#F2F7F3" stroke-width="5" stroke-linecap="round"';
+  if(i==='die'||i==='six'){const p=i==='die'?[[40,40],[80,80],[60,60]]:[[40,35],[80,35],[40,60],[80,60],[40,85],[80,85]];return `<svg viewBox="0 0 120 120" aria-hidden="true"><rect x="12" y="12" width="96" height="96" rx="20" fill="#F2F7F3"/>${p.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="8" fill="#1E4D42"/>`).join('')}</svg>`;}
+  if(i==='ladder')return `<svg viewBox="0 0 120 120" aria-hidden="true"><path d="M38 108L50 12M72 108L84 12" ${st}/><path d="M42 85h31M46 62h31M49 39h31" ${st} stroke-width="4"/></svg>`;
+  if(i==='snake')return `<svg viewBox="0 0 120 120" aria-hidden="true"><path d="M82 22C30 22 94 62 40 62S34 100 78 100" ${st} stroke-width="9"/><circle cx="84" cy="22" r="9" fill="#F2F7F3"/><circle cx="87" cy="19" r="2.5" fill="#1E4D42"/></svg>`;
+  return `<svg viewBox="0 0 120 120" aria-hidden="true"><path d="M36 108V14" ${st}/><path d="M36 16h58l-16 20 16 20H36z" fill="#B8862B"/></svg>`;
+}
+function renderDetail(){
+  const g=GAMES[0];
+  $('#v-detail').innerHTML=`
+  <button class="crumb" data-act="nav" data-v="catalog">← بازگشت به کاتالوگ</button>
+  <div class="detail">
+    <div>
+      <div class="video" id="video"><div class="stage" id="stage"></div>
+        <div class="vbar"><button data-act="vplay" id="vplay" aria-label="پخش یا توقف">❚❚</button><div class="track" id="vtrack">${[0,1,2,3,4].map(()=>'<div class="seg"><i></i></div>').join('')}</div><button data-act="vnext" aria-label="صحنه بعد">‹</button></div>
+      </div>
+      <p class="muted" style="font-size:13px;margin-top:6px">ویدیوی آموزشی ۳۰ ثانیه‌ای (نمونه؛ در نسخه نهایی ویدیوی واقعی با حضور مربی کافه جایگزین می‌شود)</p>
+      <div class="card" style="margin-top:14px"><h2 class="display" style="font-size:34px">${g.name}</h2><p class="muted" style="margin:4px 0 10px">${g.tag}</p><p>${g.desc}</p>
+        <div class="facts"><div class="fact"><b>${fa(2)}–${fa(6)} نفر</b><span>تعداد بازیکن</span></div><div class="fact"><b>${fa(15)}–${fa(30)} دقیقه</b><span>مدت هر دور</span></div><div class="fact"><b>از ${fa(4)} سالگی</b><span>سن مناسب</span></div><div class="fact"><b>شانس ۱۰۰٪</b><span>مهارت لازم نیست</span></div></div>
+      </div>
+    </div>
+    <div class="card" style="align-self:start">
+      <h3 style="font-size:19px">فضای بازی</h3>
+      <p class="muted" style="font-size:14px">تخته ۴۰×۴۰ روی هر میز جا می‌شود. میز دلخواه را انتخاب کنید.</p>
+      <div class="tables">${TABLES.map(t=>`<button class="tbtn" data-act="table" data-n="${t.n}" aria-pressed="${S.table===t.n}" ${t.busy?'disabled':''}>میز ${fa(t.n)}<small>${t.busy?'اشغال':'آزاد'}</small></button>`).join('')}</div>
+      <div style="display:grid;gap:8px">
+        <button class="btn ghost" data-act="staffboard">درخواست تخته از پیش‌خدمت</button>
+        <button class="btn ghost" data-act="chip-open" data-q="مار و پله چطور بازی می‌شود؟">آموزش را از داور بپرسید</button>
+      </div>
+      <div class="pair"><b>همراه این بازی:</b> ${g.pair}</div>
+    </div>
+  </div>`;
+}
+let vTimer=null;
+function paintScene(){
+  const sc=scenes(),s=sc[S.scene%sc.length];
+  const st=$('#stage');if(!st)return;
+  st.innerHTML=`${art(s.i)}<div><h3>${s.t}</h3><p style="opacity:.92">${s.d}</p></div>`;
+  $$('#vtrack .seg i').forEach((el,i)=>{el.style.width=i<S.scene?'100%':'0';});
+}
+function startVideo(){stopVideo();S.scene=0;S.playing=true;paintScene();const pb=$('#vplay');if(pb)pb.textContent='❚❚';let t=0;
+  vTimer=setInterval(()=>{if(!S.playing)return;t+=100;const seg=$$('#vtrack .seg i')[S.scene];if(seg)seg.style.width=Math.min(100,t/40)+'%';if(t>=4000){t=0;S.scene=(S.scene+1)%5;paintScene();}},100);}
+function stopVideo(){clearInterval(vTimer);vTimer=null;}
+
+/* ---------- recommender ---------- */
+function renderRec(){
+  const v=$('#v-rec');
+  if(S.qi>=4){return renderResult();}
+  const q=QUESTIONS[S.qi];
+  v.innerHTML=`<div class="rec">
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="muted">سؤال ${fa(S.qi+1)} از ${fa(4)}</span>
+   <button class="chip" data-act="preset">میان‌بر دمو: جمع خانوادگی، شب آرام</button></div>
+   <div class="prog" aria-hidden="true">${[0,1,2,3].map(i=>`<i class="${i<S.qi?'done':i===S.qi?'cur':''}"></i>`).join('')}</div>
+   <h2 class="qtitle">${q.q}</h2>
+   <div class="opts">${q.opts.map(o=>`<button class="opt-tile" aria-pressed="${S.ans[q.k]===o.v}" data-act="answer" data-v="${o.v}"><b>${o.t}</b><span>${o.d}</span></button>`).join('')}</div>
+   <details class="why"><summary>چرا این را می‌پرسیم؟</summary><p style="margin-top:6px">${q.why}</p></details>
+   <div class="rec-actions"><button class="btn ghost" data-act="recback" ${S.qi===0?'disabled':''}>قبلی</button><span></span></div></div>`;
+}
+function score(g,a){
+  const mood=g.tone[a.mood];
+  const target=a.energy,cxFit=1-Math.abs(g.cx-target)/2;
+  const gm=GROUP_MAP[a.group];
+  const inRange=gm.n>=g.players[0]&&gm.n<=g.players[1];
+  const near=gm.n===g.players[0]-1||gm.n===g.players[1]+1;
+  let play=inRange?1:near?.4:.08;
+  const nw=gm.newbie?(.4+.6*g.newbie):1;
+  const tf=g.time>a.time*1.15?0:Math.max(.6,1-.3*(a.time-g.time)/a.time);
+  let total=(.30*mood+.25*cxFit+.25*play+.20*tf)*nw;
+  if(play<.5)total*=.55;
+  const reasons=[];
+  if(mood>=.8)reasons.push(`با حال‌وهوای «${MOODS[a.mood]}» جور است`);
+  if(cxFit>=.99)reasons.push('پیچیدگی‌اش با باتری ذهنی امشب شما می‌خواند');
+  if(inRange)reasons.push(`برای ${fa(gm.n===7?'۵ تا ۶':gm.n)} نفر مناسب است`);
+  if(tf>=.85)reasons.push(`در حدود ${fa(g.time)} دقیقه تمام می‌شود`);
+  if(gm.newbie&&g.newbie>=.9)reasons.push('تازه‌وارد و بچه‌ها در یک دقیقه یاد می‌گیرند');
+  return {g,pct:Math.round(Math.max(0,Math.min(1,total))*100),reasons};
+}
+async function renderResult(){
+   const n8nWebhookUrl = "https://wham-aqueduct-tiptoeing.ngrok-free.dev/webhook-test/game-master";
+
+  const v=$('#v-rec');
+  v.innerHTML=`<div class="rec" style="text-align:center; padding: 40px;">
+    <div class="prog" aria-hidden="true">${[0,1,2,3].map(()=>'<i class="done"></i>').join('')}</div>
+    <div class="spinner" style="font-size: 40px; margin-bottom: 20px;">🎲</div>
+    <h2 class="display">گیم‌مستر در حال تحلیل منطقی است...</h2>
+    <p class="muted">در حال تطبیق دقیق بازی‌ها با سلیقه شما</p>
+  </div>`;
+
+  try {
+    const response = await fetch(n8nWebhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(S.ans)
+    });
+
+    if (!response.ok) throw new Error("Network response was not ok");
+    
+    const recommendations = await response.json();
+    const w = recommendations[0]; // بازی اول (بهترین انتخاب)
+    
+    // کدهای جدید برای خواندن درصدهای محاسبه شده توسط هوش مصنوعی
+    $('#v-rec').innerHTML=`<div class="rec">
+     <div class="prog" aria-hidden="true">${[0,1,2,3].map(()=>'<i class="done"></i>').join('')}</div>
+     <div class="card"><div class="winner">
+       <div class="ring" id="ring" style="--p:${w.match_percentage}"><div><span id="pct">${w.match_percentage}٪</span></div></div>
+       <div><span class="muted">بهترین پیشنهاد گیم‌مستر</span><h2 class="display" style="font-size:42px">${w.title}</h2>
+        <ul class="reasons"><li>${w.reason}</li></ul></div></div>
+       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+         <button class="btn ghost" data-act="recreset">از اول</button></div></div>
+     <h3 style="margin:22px 0 4px;font-size:18px">گزینه‌های بعدی</h3>
+     <div class="others">${recommendations.slice(1,3).map(r=>`
+       <div style="background: var(--surf); border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 8px;">
+         <div class="orow" style="cursor:default; padding: 0;">
+           <span style="font-weight: bold; font-size: 16px;">${r.title}</span>
+           <span class="bar"><i style="width:${r.match_percentage}%"></i></span>
+           <span style="font-weight: bold; font-size: 16px;">${r.match_percentage}٪</span>
+         </div>
+         <p style="font-size:13.5px; color:var(--mute); margin-top: 8px; line-height: 1.6;">${r.reason}</p>
+       </div>
+     `).join('')}</div></div>`;
+     
+     if(!S.counted){S.counted=true;S.stats.recs++;S.moods[S.ans.mood]=(S.moods[S.ans.mood]||0)+1;feed(`پیشنهاد هوشمند: «${w.title}»`);}
+
+  } catch (error) {
+    console.error("خطا:", error);
+    v.innerHTML = `<div class="empty">ارتباط با گیم‌مستر قطع شد! لطفاً ورک‌فلو را در حالت Execute قرار دهید.</div>`;
+  }
+}
+
+/* ---------- board ---------- */
+function sqPos(n){if(n<=0)return {x:0,y:107};const i=n-1,r=Math.floor(i/10),c=r%2===0?i%10:9-i%10;return {x:c*10+5,y:(9-r)*10+5};}
+function boardHTML(){
+  let sq='';
+  for(let r=9;r>=0;r--){for(let c=0;c<10;c++){const n=r*10+(r%2===0?c+1:10-c);sq+=`<div class="sq ${(r+c)%2?'alt':''} ${n===100?'goal':''} ${n===1?'begin':''}">${fa(n)}</div>`;}}
+  let svg='';
+  LADDERS.forEach(([f,t])=>{const a=sqPos(f),b=sqPos(t),dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,nx=-uy*1.5,ny=ux*1.5;
+    svg+=`<g style="stroke:var(--brass);stroke-linecap:round" fill="none"><line x1="${a.x+nx}" y1="${a.y+ny}" x2="${b.x+nx}" y2="${b.y+ny}" stroke-width=".8"/><line x1="${a.x-nx}" y1="${a.y-ny}" x2="${b.x-nx}" y2="${b.y-ny}" stroke-width=".8"/>`;
+    for(let s=3;s<L-1.5;s+=3.6)svg+=`<line x1="${a.x+ux*s+nx}" y1="${a.y+uy*s+ny}" x2="${a.x+ux*s-nx}" y2="${a.y+uy*s-ny}" stroke-width=".6"/>`;svg+='</g>';});
+  const sc=['var(--coral)','var(--plum)','var(--sky)'];
+  SNAKES.forEach(([h,t],k)=>{const a=sqPos(h),b=sqPos(t),dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy),nx=-dy/L,ny=dx/L,w=Math.min(9,L*.22)*(k%2?1:-1);
+    const d=`M${a.x},${a.y} C${a.x+dx*.3+nx*w},${a.y+dy*.3+ny*w} ${a.x+dx*.7-nx*w},${a.y+dy*.7-ny*w} ${b.x},${b.y}`;
+    svg+=`<path d="${d}" fill="none" style="stroke:${sc[k%3]}" stroke-width="2.2" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width=".7" stroke-dasharray="1.2 2.2" stroke-linecap="round"/><circle cx="${a.x}" cy="${a.y}" r="1.9" style="fill:${sc[k%3]}" stroke="#fff" stroke-width=".4"/><circle cx="${a.x-.6}" cy="${a.y-.5}" r=".4" fill="#fff"/><circle cx="${a.x+.6}" cy="${a.y-.5}" r=".4" fill="#fff"/>`;});
+  return `<div class="board-wrap"><div class="board">${sq}</div><svg class="overlay" viewBox="0 0 100 100" aria-hidden="true">${svg}</svg><div class="tokens" id="tokens"></div><span class="tray">مهره‌ها پیش از شروع اینجا هستند (بیرون از تخته)</span></div>`;
+}
+function dieHTML(v){const m={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]}[v]||[];return range(0,8).map(i=>`<i class="${m.includes(i)?'on':''}"></i>`).join('');}
+
+/* ---------- play ---------- */
+function renderPlay(){
+  const v=$('#v-play');
+  if(!S.play){
+    const n=S.setup.n;
+    v.innerHTML=`<div class="setup card">
+     <h2>میز بازی${S.table?' · میز '+fa(S.table):''}</h2>
+     <p class="muted">مهره‌ها را روی صفحه حرکت می‌دهید یا عدد تاس واقعی را وارد می‌کنید؛ داور هوشمند هر لحظه کنار میز است.</p>
+     <div><b>تعداد بازیکن</b><div class="seg-pick" style="margin-top:6px">${[2,3,4].map(k=>`<button class="chip" aria-pressed="${n===k}" data-act="pcount" data-n="${k}">${fa(k)} نفر</button>`).join('')}</div></div>
+     <div class="names">${range(0,n-1).map(i=>`<input data-name="${i}" placeholder="بازیکن ${fa(i+1)}" value="${esc(S.setup.names[i])}" aria-label="نام بازیکن ${fa(i+1)}">`).join('')}</div>
+     <div><b>قوانین این میز</b><div data-rules style="margin-top:6px"></div></div>
+     <button class="btn" data-act="begin">شروع بازی</button></div>`;
+    refreshRules();return;
+  }
+  v.innerHTML=`<div class="play"><div>${boardHTML()}</div>
+   <div class="panel">
+    <div class="card"><div class="turnbox"><span class="dot" id="tdot"></span><div><div class="muted" style="font-size:13px">نوبت</div><b id="tname" style="font-size:19px"></b></div>
+      <button class="btn ghost" style="margin-inline-start:auto;padding:6px 12px" data-act="endgame">بازی تازه</button></div>
+     <div class="rollrow" style="margin-top:14px"><div class="die" id="die">${dieHTML(1)}</div><button class="btn" id="rollbtn" data-act="roll" style="flex:1;padding:14px">تاس بینداز</button></div>
+     <div class="manual" style="margin-top:12px"><span>تاس واقعی انداختید؟</span>${range(1,6).map(k=>`<button data-act="manual" data-v="${k}" aria-label="عدد ${fa(k)}">${fa(k)}</button>`).join('')}</div>
+     <div id="winbox"></div></div>
+    <div class="card"><div class="plist" id="plist"></div><button class="btn ghost" style="margin-top:10px;width:100%;padding:7px" data-act="demo97">دمو: مهرهٔ نوبت را ببر روی خانه ۹۷</button></div>
+    <div class="card"><h3 style="font-size:16px;margin-bottom:6px">رویدادها</h3><ul class="log" id="log"></ul>
+      <button class="btn brass" style="margin-top:10px;width:100%" data-act="chip-open" data-q="">اختلاف داریم؟ بپرس از داور</button></div>
+   </div></div>`;
+  updateTokens();updateUI();
+}
+function begin(){
+  const n=S.setup.n;
+  S.play={players:range(0,n-1).map(i=>({name:S.setup.names[i].trim()||`بازیکن ${fa(i+1)}`,pos:0,col:COLORS[i]})),turn:0,sixes:0,busy:false,over:false,log:[]};
+  S.stats.plays++;feed(`بازی مار و پله شروع شد (${fa(n)} نفر)${S.table?'، میز '+fa(S.table):''}`);
+  renderPlay();plog('بازی شروع شد. مهره‌ها بیرون از تخته‌اند.');updateChatHead();
+}
+function plog(t){const P=S.play;P.log.unshift(t);P.log=P.log.slice(0,30);const el=$('#log');if(el)el.innerHTML=P.log.map(x=>`<li>${x}</li>`).join('');}
+function updateTokens(){
+  const P=S.play,box=$('#tokens');if(!P||!box)return;
+  if(!box.children.length)box.innerHTML=P.players.map((p,i)=>`<div class="tok" data-i="${i}" style="--c:${p.col}">${fa(i+1)}</div>`).join('');
+  P.players.forEach((p,i)=>{
+    const same=P.players.map((q,j)=>({q,j})).filter(o=>o.q.pos===p.pos&&p.pos>0),k=same.findIndex(o=>o.j===i),cnt=same.length||1;
+    const pt=sqPos(p.pos);let x=pt.x,y=pt.y;
+    if(p.pos===0)x=6+i*7;else x+= (k-(cnt-1)/2)*2.6;
+    const el=box.children[i];el.style.left=x+'%';el.style.top=y+'%';el.classList.toggle('cur',i===P.turn&&!P.over);
+  });
+}
+function updateUI(){
+  const P=S.play;if(!P||!$('#tname'))return;
+  const c=P.players[P.turn];$('#tname').textContent=c.name;$('#tdot').style.setProperty('--c',c.col);$('#tdot').textContent=fa(P.turn+1);
+  $('#rollbtn').disabled=P.busy||P.over;$$('.manual button').forEach(b=>b.disabled=P.busy||P.over);
+  $('#plist').innerHTML=P.players.map((p,i)=>`<div class="prow"><span class="dot" style="--c:${p.col}">${fa(i+1)}</span><span>${esc(p.name)}</span><span>${p.pos?'خانه '+fa(p.pos):'بیرون تخته'}${p.pos?' · '+fa(100-p.pos)+' تا پایان':''}</span></div>`).join('');
+  $('#log').innerHTML=P.log.map(x=>`<li>${x}</li>`).join('');
+  updateTokens();
+}
+async function roll(forced){
+  const P=S.play;if(!P||P.busy||P.over)return;
+  P.busy=true;updateUI();
+  const die=$('#die');let v=forced;
+  if(!v){die.classList.add('rolling');for(let i=0;i<8;i++){die.innerHTML=dieHTML(1+Math.floor(Math.random()*6));await sleep(70);}die.classList.remove('rolling');v=1+Math.floor(Math.random()*6);}
+  die.innerHTML=dieHTML(v);
+  await turn(v);
+}
+function planMove(pos,v){
+  const t=pos+v;
+  if(t<=100)return {path:range(pos+1,t)};
+  const ex=t-100;
+  if(R.finish==='exact')return {stay:true,note:`${fa(pos)} + ${fa(v)} از ۱۰۰ بیشتر است؛ مهره سر جای خود می‌ماند (باید دقیقاً ${fa(100-pos)} بیاورد)`};
+  if(R.finish==='over')return {path:range(pos+1,100)};
+  const back=[];for(let i=1;i<=ex;i++)back.push(100-i);
+  return {path:[...range(pos+1,100),...back],bounce:ex};
+}
+async function turn(v){
+  const P=S.play,p=P.players[P.turn];
+  plog(`${esc(p.name)} تاس ${fa(v)} آورد`);
+  if(v===6&&R.six){P.sixes++;if(P.sixes>=3){plog('سومین ۶ پشت‌سرهم؛ این پرتاب حساب نمی‌شود و نوبت می‌گذرد');P.sixes=0;return next(false);}}else P.sixes=0;
+  const plan=planMove(p.pos,v);
+  if(plan.stay)plog(plan.note);
+  else{
+    for(const s of plan.path){p.pos=s;updateTokens();await sleep(170);}
+    if(plan.bounce)plog(`${fa(plan.bounce)} خانه اضافه از ۱۰۰ به عقب برگشت`);
+    const t=TR[p.pos];
+    if(t){plog(t.type==='ladder'?`نردبان! از ${fa(p.pos)} به ${fa(t.to)}`:`مار! از ${fa(p.pos)} به ${fa(t.to)}`);await sleep(350);p.pos=t.to;updateTokens();await sleep(450);}
+  }
+  if(p.pos===100){P.over=true;P.busy=false;plog(`${esc(p.name)} به خانهٔ ۱۰۰ رسید`);feed(`بازی تمام شد؛ برنده: ${p.name}`);updateUI();$('#winbox').innerHTML=`<div class="win" style="margin-top:12px">${esc(p.name)} برنده شد! بازی تازه را از بالا شروع کنید.</div>`;return;}
+  next(v===6&&R.six);
+}
+function next(extra){const P=S.play;if(extra)plog('عدد ۶: نوبت اضافه');else P.turn=(P.turn+1)%P.players.length;P.busy=false;updateUI();}
+
+/* ---------- rules UI ---------- */
+function rulesHTML(){
+  return `<div class="rules"><fieldset><legend>پایان بازی در خانهٔ ۱۰۰</legend>
+  ${[['exact','عدد دقیق لازم است'],['bounce','برگشت از ۱۰۰'],['over','هر عدد بزرگ‌تر کافی است']].map(([v,t])=>`<label class="opt"><input type="radio" name="fin" value="${v}" ${R.finish===v?'checked':''} data-act="rule" data-k="finish"><span>${t}</span></label>`).join('')}</fieldset>
+  <label class="opt"><input type="checkbox" ${R.six?'checked':''} data-act="rule" data-k="six"><span>عدد ۶ = نوبت اضافه</span></label></div>`;
+}
+function refreshRules(){$$('[data-rules]').forEach(e=>e.innerHTML=rulesHTML());updateChatHead();}
+const FIN_LABEL={exact:'پایان با عدد دقیق',bounce:'برگشت از ۱۰۰',over:'هر عدد بزرگ‌تر'};
+
+/* ---------- AI game master ---------- */
+const norm=s=>String(s).replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[\u200c\u200f]/g,' ').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\s+/g,' ').toLowerCase();
+const heads=()=>SNAKES.map(s=>fa(s[0])).join('، ');
+const bottoms=()=>LADDERS.map(l=>fa(l[0])).join('، ');
+const tNote=sq=>TR[sq]?(TR[sq].type==='ladder'?` خانهٔ ${fa(sq)} پایین یک نردبان است و تا ${fa(TR[sq].to)} بالا می‌روید.`:` خانهٔ ${fa(sq)} سر یک مار است و تا ${fa(TR[sq].to)} پایین می‌لغزید.`):'';
+function aFinish(q,nums){
+  const pos=nums.find(n=>n>=7&&n<=99),roll=nums.find(n=>n>=1&&n<=6)||(/شش/.test(q)?6:null);
+  let t,ref='قانون ۵ · پایان بازی';
+  if(pos&&roll){
+    const tot=pos+roll;
+    if(tot===100)t=`${fa(pos)} + ${fa(roll)} = ۱۰۰؛ دقیقاً روی خانهٔ آخر ایستادید و برنده‌اید.`;
+    else if(tot<100)t=`با ${fa(roll)} به خانهٔ ${fa(tot)} می‌روید؛ هنوز به ۱۰۰ نرسیده‌اید.`+tNote(tot);
+    else{
+      const ex=tot-100;
+      if(R.finish==='exact')t=`${fa(pos)} + ${fa(roll)} = ${fa(tot)} و این ${fa(ex)} خانه از ۱۰۰ بیشتر است. طبق قانون این میز («عدد دقیق») حرکتی انجام نمی‌شود، مهره روی ${fa(pos)} می‌ماند و برای برد باید دقیقاً ${fa(100-pos)} بیاورید.`;
+      else if(R.finish==='bounce'){const dest=100-ex;t=`${fa(pos)} + ${fa(roll)} = ${fa(tot)}؛ ${fa(ex)} خانه اضافه است. طبق قانون این میز («برگشت از ۱۰۰») تا ۱۰۰ می‌روید و ${fa(ex)} خانه به عقب برمی‌گردید؛ مهره روی ${fa(dest)} می‌نشیند. هنوز برنده نیستید.`+tNote(dest);}
+      else t=`${fa(pos)} + ${fa(roll)} = ${fa(tot)} و از ۱۰۰ رد شده؛ طبق قانون این میز («هر عدد بزرگ‌تر کافی است») همین حالا برنده‌اید.`;
+    }
+    if(roll===6&&R.six&&tot!==100&&!(tot>100&&R.finish==='over'))t+=' چون ۶ آورده‌اید و «نوبت اضافه» فعال است، دوباره تاس می‌اندازید.';
+  }else t=`قانون فعال این میز: «${FIN_LABEL[R.finish]}». `+{exact:'برای برد باید دقیقاً به خانهٔ ۱۰۰ برسید؛ اگر عدد تاس بیشتر بود، مهره جابه‌جا نمی‌شود.',bounce:'اگر عدد تاس از فاصله تا ۱۰۰ بیشتر بود، خانه‌های اضافه را از ۱۰۰ به عقب برمی‌گردید.',over:'با هر عدد برابر یا بزرگ‌تر از فاصله تا ۱۰۰ برنده می‌شوید.'}[R.finish]+' موقعیت و عدد تاس را بگویید تا دقیق حساب کنم.';
+  return {text:t,ref,chips:['اگر روی ۹۸ باشم و ۴ بیاورم چه می‌شود؟','قانون ۶ چیست؟']};
+}
+const INTENTS=[
+ {id:'finish',k:['100','صد','برنده','دقیق','اضافه','بیشتر','پایان','آخر','برگشت','ببرم','برسم','رد شد','رد کنم']},
+ {id:'six',k:['شش','سه بار','سه تا','پشت سر هم','نوبت اضافه','دوباره بندازم','دوباره تاس','6']},
+ {id:'chain',k:['نوک نردبان','بالای نردبان','بعد از نردبان','بعد از مار','زنجیر','دوباره مار','هم زمان','نردبان و مار','مار و نردبان','پشت هم']},
+ {id:'snake',k:['مار','سر مار','دم مار','گاز','سقوط','لیز','سرخور','سر خور']},
+ {id:'ladder',k:['نردبان','پله','بالا رفت','بالا برم','پایین نردبان','میان بر']},
+ {id:'same',k:['هم خانه','همان خانه','یک خانه','یه خانه','روی هم','مهره دیگ','دو مهره','بزنم','بخوره','حذف','اخراج','کشتن']},
+ {id:'forced',k:['اجباری','اختیاری','نمیخوام','نمی خوام','نخوام','حرکت نکنم','انتخاب','بالا نرم']},
+ {id:'first',k:['کی شروع','نفر اول','اولین نفر','شروع بازی','کی اول','ترتیب','تاس اول','خانه 1','خانه اول','صفر','خانه 0','عدد 1','تاس 1','ورود']},
+ {id:'dice',k:['افتاد','کج','لبه','خارج','پرید','ایستاد','نامعتبر','دوباره بندازیم','فرش','زمین','روی تخته']},
+ {id:'turn',k:['نوبت کیه','نوبت کی','نوبت چه','الان نوبت','نوبت کدوم']},
+ {id:'status',k:['کجام','چندم','موقعیت','وضعیت','چند خانه','مونده','جلوتر','جلوئه','خانه من']},
+ {id:'info',k:['چند نفر','مناسب','چقدر طول','چقدر زمان','سن','بچه']},
+ {id:'rules',k:['قوانین','قانون','آموزش','چطور بازی','چطوری بازی','خلاصه','یاد بگیر','قاعده','چطور']},
+ {id:'dispute',k:['اختلاف','دعوا','حکم','داور','بحث','ناعادلانه','تقلب']}
+];
+function answer(raw){
+  const q=norm(raw),nums=(q.match(/\d+/g)||[]).map(Number);
+  let best=null,bs=0;
+  INTENTS.forEach(it=>{let s=it.k.reduce((a,k)=>a+(q.includes(norm(k))?1:0),0);if(it.id==='finish'&&nums.some(n=>n>=90&&n<=100))s+=2;if(s>bs){bs=s;best=it;}});
+  const P=S.play;
+  switch(best&&best.id){
+   case 'finish':return aFinish(q,nums);
+   case 'six':return {text:R.six?'طبق قانون این میز، عدد ۶ یک نوبت اضافه می‌دهد. اگر سه بار پشت‌سرهم ۶ بیاید، پرتاب سوم حساب نمی‌شود و نوبت به نفر بعد می‌رسد. اگر نمی‌خواهید، «نوبت اضافه» را در قوانین میز خاموش کنید.':'قانون این میز: ۶ نوبت اضافه ندارد و مثل بقیه اعداد فقط شش خانه حرکت می‌کنید.',ref:'قانون ۳ · نوبت و عدد ۶',chips:['پایان بازی چطور است؟']};
+   case 'chain':return {text:'در هر حرکت فقط یک جابه‌جایی انجام می‌شود (مار یا نردبان). در تخته‌ی این میز هیچ نوک نردبانی روی سر مار نیست، پس این وضعیت پیش نمی‌آید؛ در تخته‌ی دیگر هم همین قانون «فقط یک جابه‌جایی» را اعمال کنید.',ref:'قانون ۴ · مار و نردبان',chips:['سر مارها کجاست؟']};
+   case 'snake':return {text:`فقط اگر مهره دقیقاً روی «سر» مار بایستد، تا دُمش پایین می‌لغزد. عبور از روی سر مار، یا ایستادن روی بدن و دُم، اثری ندارد. سر مارهای این تخته روی خانه‌های ${heads()} است.`,ref:'قانون ۴ · مار و نردبان',chips:['ته نردبان چه می‌شود؟','اگر نوک نردبان روی سر مار باشد؟']};
+   case 'ladder':return {text:`ایستادن روی پایین نردبان یعنی بالا رفتن؛ این حرکت اجباری است و انصراف ندارد. بالای نردبان و عبور از کنارش اثری ندارد. نردبان‌های این تخته از خانه‌های ${bottoms()} شروع می‌شوند.`,ref:'قانون ۴ · مار و نردبان',chips:['اگر تاس اول ۱ بیاید؟','سر مارها کجاست؟']};
+   case 'same':return {text:'هر تعداد مهره می‌توانند روی یک خانه بایستند. در مار و پله مهره‌ای حذف یا به عقب فرستاده نمی‌شود؛ آن قانون «منچ» است.',ref:'قانون ۲ · مهره‌ها',chips:['حرکت اجباری است؟']};
+   case 'forced':return {text:'حرکت اجباری است: عدد تاس که آمد، مهره باید همان‌قدر جلو برود، و مار و نردبان هم اجباری‌اند. فقط در حالت «عدد دقیق» اگر عدد از ۱۰۰ بیشتر شد، مهره حرکت نمی‌کند.',ref:'قانون ۱ · حرکت',chips:['پایان بازی چطور است؟']};
+   case 'first':return {text:'هر بازیکن یک بار تاس می‌اندازد و بالاترین عدد شروع می‌کند (تساوی: تکرار). مهره‌ها پیش از شروع بیرون از تخته‌اند. نکته: خانهٔ ۱ پایین یک نردبان است؛ اگر تاس اول ۱ بیاید، مهره بلافاصله به خانهٔ ۳۸ می‌رود.',ref:'قانون ۱ · شروع بازی',chips:['ته نردبان چه می‌شود؟']};
+   case 'dice':return {text:'تاس باید روی سطح صاف میز بایستد. اگر کج ایستاد، روی تخته یا مهره‌ها افتاد، یا از میز بیرون رفت، آن پرتاب باطل است و همان بازیکن دوباره می‌اندازد. اگر بر سر عدد اختلاف بود هم پرتاب تکرار می‌شود.',ref:'قانون ۶ · پرتاب نامعتبر',chips:['اختلاف دیگری داریم']};
+   case 'turn':return P&&!P.over?{text:`نوبت ${P.players[P.turn].name} است. او الان ${P.players[P.turn].pos?'روی خانهٔ '+fa(P.players[P.turn].pos):'بیرون از تخته'} است.`,ref:'وضعیت بازی روی میز',chips:['وضعیت همه چطور است؟']}:{text:'بازی‌ای روی این میز در جریان نیست. از «میز بازی» بازی را شروع کنید.',ref:'وضعیت بازی',chips:['مار و پله چطور بازی می‌شود؟']};
+   case 'status':if(P){const ps=[...P.players].sort((a,b)=>b.pos-a.pos);return {text:ps.map(p=>`${p.name}: ${p.pos?'خانه '+fa(p.pos)+' ('+fa(100-p.pos)+' خانه تا پایان)':'بیرون از تخته'}`).join('؛ ')+`. جلوتر از همه: ${ps[0].name}.`,ref:'وضعیت بازی روی میز',chips:['نوبت کیست؟']};}return {text:'بازی‌ای در جریان نیست؛ بعد از شروع بازی، موقعیت همهٔ مهره‌ها را اینجا می‌بینید.',ref:'وضعیت بازی',chips:[]};
+   case 'info':return {text:'مار و پله برای ۲ تا ۶ نفر است، هر دور حدود ۱۵ تا ۳۰ دقیقه طول می‌کشد و از ۴ سالگی قابل بازی است. چون کاملاً شانسی است، برای جمع‌های مختلط و تازه‌وارد‌ها عالی است.',ref:'مشخصات بازی',chips:['قوانین را خلاصه بگو']};
+   case 'rules':return {text:`خلاصه: ۱) به نوبت تاس بیندازید و همان‌قدر جلو بروید. ۲) روی پایین نردبان بالا می‌روید، روی سر مار پایین می‌لغزید. ۳) ${R.six?'عدد ۶ نوبت اضافه دارد.':'عدد ۶ نوبت اضافه ندارد.'} ۴) برنده اولین نفری است که به ۱۰۰ برسد؛ قانون این میز: «${FIN_LABEL[R.finish]}».`,ref:'خلاصه قوانین · نسخه میز',chips:['پایان بازی چطور است؟','اگر دو مهره روی یک خانه باشند؟']};
+   case 'dispute':return {text:'ماجرا را بگویید تا طبق قوانین میز حکم بدهم. بیشتر اختلاف‌ها دربارهٔ این‌هاست: عدد دقیق برای پایان، نوبت اضافه با ۶، تاس کج، و مهره‌های هم‌خانه. اگر پاسخ قانع‌تان نکرد، پیش‌خدمت سالن را صدا بزنید.',ref:'داوری',chips:['تاس کج افتاد','اگر دو مهره روی یک خانه باشند؟',{t:'صدا زدن پیش‌خدمت',act:'staff'}]};
+  }
+  return {text:'این مورد در قوانین ثبت‌شده‌ی مار و پله پیدا نشد و حدس نمی‌زنم. می‌توانید سؤال را با جزئیات بیشتر بنویسید یا پیش‌خدمت سالن را صدا بزنید.',ref:'خارج از قوانین ثبت‌شده',chips:[{t:'صدا زدن پیش‌خدمت',act:'staff'},'قوانین را خلاصه بگو']};
+}
+function initChat(){
+  chatEl.innerHTML=`<div class="chat-head"><b>داور هوشمند · مار و پله</b><small id="chead"></small></div>
+   <div class="msgs" id="msgs" aria-live="polite"></div>
+   <div class="ctx" id="ctx"></div>
+   <div class="sugg" id="sugg"></div>
+   <div class="ask"><input id="qin" type="text" placeholder="سؤال یا اختلافتان را بنویسید" aria-label="پرسش از داور هوشمند" autocomplete="off"><button class="btn" data-act="send">بپرس</button></div>`;
+  addMsg('ai','سلام، من داور هوشمند این میز هستم. هر سؤالی دربارهٔ قوانین مار و پله یا اختلاف وسط بازی دارید، بپرسید.');
+  setSugg(['روی خانه ۹۷ هستم و ۶ آوردم؛ برنده‌ام؟','اگر تاس اول ۱ بیاید؟','اگر دو مهره روی یک خانه باشند؟','تاس کج افتاد']);
+  updateChatHead();
+}
+function updateChatHead(){
+  const h=$('#chead');if(h)h.textContent=`قوانین میز: ${FIN_LABEL[R.finish]} · ${R.six?'۶ = نوبت اضافه':'بدون نوبت اضافه'}`;
+  const c=$('#ctx');if(c){const P=S.play;c.textContent=P&&!P.over?`بازی در جریان: نوبت ${P.players[P.turn].name}`:'';}
+}
+function addMsg(who,text,ref){const m=document.createElement('div');m.className='msg '+who;m.textContent=text;if(ref){const r=document.createElement('span');r.className='ref';r.textContent='مرجع: '+ref;m.appendChild(r);}$('#msgs').appendChild(m);$('#msgs').scrollTop=1e6;return m;}
+function setSugg(list){$('#sugg').innerHTML=list.map(c=>typeof c==='string'?`<button class="chip" data-act="chip" data-q="${esc(c)}">${esc(c)}</button>`:`<button class="chip" data-act="${c.act}">${c.t}</button>`).join('');}
+async function ask(q){
+  q=q.trim();if(!q||S.chatBusy)return;
+  S.chatBusy=true;addMsg('me',q);S.stats.ai++;S.qlog.unshift(q);feed('سؤال از داور: «'+q.slice(0,40)+(q.length>40?'…':'')+'»');
+  const typ=document.createElement('div');typ.className='msg ai typing';typ.innerHTML='<i></i><i></i><i></i>';$('#msgs').appendChild(typ);$('#msgs').scrollTop=1e6;
+  await sleep(700);typ.remove();
+  const a=answer(q),m=addMsg('ai','');
+  const words=a.text.split(' ');for(let i=0;i<words.length;i++){m.textContent=words.slice(0,i+1).join(' ');$('#msgs').scrollTop=1e6;await sleep(24);}
+  const r=document.createElement('span');r.className='ref';r.textContent='مرجع: '+a.ref;m.appendChild(r);
+  setSugg(a.chips&&a.chips.length?a.chips:['قوانین را خلاصه بگو']);
+  S.chatBusy=false;$('#msgs').scrollTop=1e6;
+}
+function openAsk(q){if(S.view!=='assistant')openDrawer();if(q)ask(q);else setTimeout(()=>{const i=$('#qin');i&&i.focus();},50);}
+
+/* ---------- owner ---------- */
+function renderOwner(){
+  const st=S.stats,top=Object.entries(S.moods).sort((a,b)=>b[1]-a[1])[0];
+  $('#v-owner').innerHTML=`<h2 class="sec-title">پنل کافه</h2>
+  <p class="muted" style="margin-bottom:14px">آنچه صاحب کافه از همین نمونه می‌بیند؛ اعداد زنده‌اند و با هر کاری که در برنامه می‌کنید تغییر می‌کنند.</p>
+  <div class="stats"><div class="stat"><b>${fa(st.recs)}</b>پیشنهاد هوشمند</div><div class="stat"><b>${fa(st.plays)}</b>بازی شروع‌شده</div><div class="stat"><b>${fa(st.ai)}</b>سؤال از داور</div><div class="stat"><b>${fa(st.staff)}</b>درخواست پیش‌خدمت</div></div>
+  <div class="two">
+   <div class="card"><h3 style="font-size:17px">آخرین رویدادهای سالن</h3>${S.feed.length?`<ul class="feedlist">${S.feed.map(f=>`<li><time>${f.t}</time><span>${esc(f.txt)}</span></li>`).join('')}</ul>`:'<div class="empty">هنوز رویدادی ثبت نشده. «پیشنهاد هوشمند» را کامل کنید یا یک بازی شروع کنید.<br><button class="btn" style="margin-top:10px" data-act="nav" data-v="rec">رفتن به پیشنهاد هوشمند</button></div>'}</div>
+   <div class="card"><h3 style="font-size:17px">چه حسی می‌خواهند؟</h3>${top?`<p style="margin:8px 0">پرتکرارترین حال‌وهوا تا اینجا: <b>${MOODS[top[0]]}</b> (${fa(top[1])} بار)</p>`:'<div class="empty">بعد از چند پیشنهاد، اینجا می‌بینید مشتری‌های شما بیشتر دنبال چه حسی هستند.</div>'}
+   <h3 style="font-size:17px;margin-top:16px">پرسش‌های داور</h3>${S.qlog.length?`<ul class="feedlist">${S.qlog.slice(0,5).map(q=>`<li>${esc(q)}</li>`).join('')}</ul>`:'<div class="empty">هنوز سؤالی پرسیده نشده.</div>'}</div></div>
+  <h3 class="sec-title" style="margin-top:28px;font-size:24px">قدم‌های بعدی محصول</h3>
+  <div class="road">${ROADMAP.map(([t,d])=>`<div class="card"><h4>${t}</h4><p>${d}</p></div>`).join('')}</div>`;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act;
+  switch(a){
+   case 'nav':go(t.dataset.v);break;
+   case 'theme':{const r=document.documentElement,dark=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);r.dataset.theme=dark?'light':'dark';break;}
+   case 'filter':S.filter=t.dataset.k;renderCatalog();break;
+   case 'open':{const g=GAMES.find(x=>x.id===t.dataset.id);if(g.ready){renderDetail();go('detail');}else toast('«'+g.name+'» در نسخه کامل اضافه می‌شود؛ در این نمونه مار و پله را ببینید');break;}
+   case 'vplay':S.playing=!S.playing;t.textContent=S.playing?'❚❚':'▶';break;
+   case 'vnext':S.scene=(S.scene+1)%5;paintScene();break;
+   case 'table':S.table=+t.dataset.n;renderDetail();paintScene();break;
+   case 'staffboard':S.stats.staff++;feed('درخواست تخته مار و پله'+(S.table?' برای میز '+fa(S.table):''));toast('درخواست شما برای پیش‌خدمت ثبت شد');break;
+   case 'staff':S.stats.staff++;feed('درخواست پیش‌خدمت از داور هوشمند');addMsg('ai','پیش‌خدمت سالن خبر شد و به میز می‌آید.');toast('پیش‌خدمت صدا زده شد');break;
+   case 'startplay':if(!S.play)renderPlay();go('play');break;
+   case 'answer':{const q=QUESTIONS[S.qi];const raw=t.dataset.v;S.ans[q.k]=isNaN(+raw)?raw:+raw;renderRec();setTimeout(()=>{S.qi++;renderRec();},RM?0:220);break;}
+   case 'recback':if(S.qi>0){S.qi--;renderRec();}break;
+   case 'recreset':S.qi=0;S.ans={};S.counted=false;renderRec();break;
+   case 'preset':S.ans={mood:'chill',energy:1,group:'mixed',time:20};S.qi=4;S.counted=false;renderRec();break;
+   case 'pcount':S.setup.n=+t.dataset.n;renderPlay();break;
+   case 'begin':begin();break;
+   case 'endgame':S.play=null;renderPlay();updateChatHead();break;
+   case 'roll':roll();break;
+   case 'manual':roll(+t.dataset.v);break;
+   case 'demo97':{const P=S.play;if(P&&!P.busy&&!P.over){P.players[P.turn].pos=97;plog(`(دمو) مهرهٔ ${esc(P.players[P.turn].name)} روی خانهٔ ۹۷ قرار گرفت`);updateUI();}break;}
+   case 'rule':if(t.dataset.k==='finish')R.finish=t.value;else R.six=t.checked;refreshRules();break;
+   case 'drawer':openDrawer();break;
+   case 'drawer-close':closeDrawer();break;
+   case 'chip':if(S.view!=='assistant'&&!S.drawer)openDrawer();ask(t.dataset.q);break;
+   case 'chip-open':openAsk(t.dataset.q);break;
+   case 'send':{const i=$('#qin');const v=i.value;i.value='';ask(v);break;}
+  }
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='gsearch'){S.q=e.target.value;const pos=e.target.selectionStart;renderCatalog();const i=$('#gsearch');i.focus();i.setSelectionRange(pos,pos);}
+  if(e.target.dataset&&e.target.dataset.name!==undefined)S.setup.names[+e.target.dataset.name]=e.target.value;
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='qin'){e.preventDefault();const v=e.target.value;e.target.value='';ask(v);}});
+
+/* ---------- init ---------- */
+renderCatalog();renderRec();refreshRules();mount($('#assistantSlot'));initChat();go('catalog');
+</script>
+</body>
+</html>
