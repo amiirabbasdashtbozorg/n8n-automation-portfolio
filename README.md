@@ -11,7 +11,7 @@ A curated collection of production-ready, enterprise-grade **n8n workflows** spe
 | **[01-sut-rag-assistant](./01-sut-rag-assistant)** | **SUT Academic RAG Assistant** | n8n, LangChain, Google Gemini, Qdrant Cloud, PostgreSQL, Recursive Chunking |
 | **[02-khanoumi-price-tracker](./02-khanoumi-price-tracker)** | **E-Commerce Price Intelligence** | n8n, Browserless.io, Headless Chrome, JavaScript (ES6+), Google Sheets API |
 | **[03-football-news-bot](./03-football-news-bot)** | **Sports Media & News Summarizer** | n8n, REST APIs, RSS/XML, OpenRouter (GPT-4o-mini), Telegram Bot API |
-| [04-game-master-ai](./04-game-master-ai) | AI Board Game Recommender & Game Master | n8n, Vibe Coding, OpenRouter (LLMs), Webhooks, REST API, JavaScript (SPA) |
+| **[04-game-master-x-n8n](./04-game-master-x-n8n)** | AI Board Game Recommender & Game Master | n8n, Vibe Coding, OpenRouter (LLMs), Webhooks, REST API, JavaScript (SPA) |
 
 ---
 
