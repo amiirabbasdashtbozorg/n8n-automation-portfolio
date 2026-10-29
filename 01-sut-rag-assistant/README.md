@@ -1,22 +1,23 @@
 # 🎓 SUT Academic Regulations Enterprise RAG Assistant
 
-![Workflow Architecture](./assets/workflow-preview.png)
-
-A production-ready Retrieval-Augmented Generation (RAG) conversational pipeline built in **n8n**, designed to answer student queries regarding Sharif University's official MSc educational bylaws with strict legal grounding.
+A production-ready, full-stack conversational Retrieval-Augmented Generation (RAG) system built for Sharif University students, featuring a modern Next.js frontend and an n8n-powered backend.
 
 ---
 
 ### 🏛️ Architecture & Technical Highlights
-* **Decoupled Enterprise Pipeline:** Separates the one-time Document Ingestion sub-flow (PDF parsing, recursive chunking, Google Gemini embeddings, Qdrant cloud vector indexing) from the real-time inference conversational agent.
-* **Advanced Query Transformation (CoT):** System prompt forces the LLM to analyze colloquial/slang student terms (e.g., "آموزش‌محور", "مشروطی") and translate them into formal regulatory bylaws *before* querying the vector database.
-* **Persistent Session State:** Integrates PostgreSQL (`Postgres Chat Memory`) for dynamic multi-turn conversation tracking mapped directly to chat session IDs.
+* **Full-Stack Decoupled Architecture:** Separates a high-performance Next.js (App Router) frontend interface from an advanced n8n RAG workflow via secure server-side API routes.
+* **Advanced Conversational UI:** Implements a feature-rich SPA chat interface with persistent local storage, dynamic multi-session management, auto-titling, and interactive chat deletion/renaming.
+* **Document Ingestion Pipeline:** Decoupled one-time sub-flow handling PDF parsing, recursive chunking, Google Gemini embeddings, and Qdrant Cloud vector indexing.
+* **Advanced Query Transformation (CoT):** System prompt forces the LLM to analyze colloquial student terms (e.g., "مشروطی") and translate them into formal regulatory bylaws *before* vector search.
+* **Persistent Session State:** Integrates PostgreSQL (`Postgres Chat Memory`) for dynamic multi-turn conversation tracking mapped directly to frontend session IDs.
 * **Low-Latency Inference:** Powered by Google Gemini Flash Lite and Qdrant Cloud vector search as a callable tool (`search_sharif_rules`).
 
 ---
 
 ### 🛠️ Tech Stack & Tools
-* **Workflow Engine:** `n8n` (Self-Hosted via Docker)
+* **Frontend:** Next.js (App Router), TypeScript, Tailwind/Custom CSS, Lucide Icons
+* **Workflow Engine & Backend:** `n8n` (Self-Hosted), Webhooks, REST APIs
 * **Orchestration:** LangChain-powered AI Agents
 * **LLM & Embeddings:** Google Gemini (`gemini-3.1-flash-lite`, `gemini-embedding-001`)
 * **Vector Store:** Qdrant Cloud
-* **Memory Layer:** PostgreSQL
+* **Memory & Database:** PostgreSQL
