@@ -1,3 +1,16 @@
+## 📸 Preview
+
+### 🎨 Frontend Interface
+<p align="center">
+  <img src="assets/user-interface.png" alt="Frontend Preview" width="85%"/>
+</p>
+
+### ⚙️ n8n Automation Workflow
+<p align="center">
+  <img src="assets/workflow.png" alt="Workflow Preview" width="85%"/>
+</p>
+
+
 # 🎓 SUT Academic Regulations Enterprise RAG Assistant
 
 A production-ready, full-stack conversational Retrieval-Augmented Generation (RAG) system built for Sharif University students, featuring a modern Next.js frontend and an n8n-powered backend.
