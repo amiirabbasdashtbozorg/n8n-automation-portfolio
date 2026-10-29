@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "\n## Document Ingestion Pipeline (Run-Once / Setup)\n\n\n\n> **Note for Evaluators & Users:**\n> This sub-flow handles PDF ingestion, document parsing, chunking, and embedding generation into Qdrant Cloud.\n> \n> - **Pre-indexed Dataset:** The official *Sharif University MSc Educational Regulations (New MSc Regulation.pdf)* is already processed and indexed into the vector collection (`sharif_rules`, 3072 dims).\n> - **Operational State:** These ingestion nodes are set to **Disabled / Idle** by default to prevent redundant uploads and vector duplication during chat inference.",
-        "height": 812,
+        "height": 876,
         "width": 876,
         "color": 3
       },
@@ -19,8 +19,8 @@
     },
     {
       "parameters": {
-        "content": "## RAG Inference & Conversational Agent\n\n\n\n> **Production Core:**\n> - **Orchestration:** LangChain-powered AI Agent in n8n (zero-latency single-agent architecture).\n> - **Reasoning Model:** Google Gemini Flash Lite (optimized for low-latency, high-throughput responses).\n> - **Embedding Engine:** Google Gemini (`models/gemini-embedding-001`, 3072-dimensional vectors).\n> - **State & Persistence:** PostgreSQL (`Postgres Chat Memory`) with dynamic session tracking mapped to the Chat Trigger session ID.\n> - **Vector Store:** Qdrant Cloud as a callable tool (`Sharif Vector DB`, 67 pre-indexed regulation chunks).\n> - **Contextual Understanding:** In-prompt Chain-of-Thought (CoT) query transformation mapping student colloquial terms (e.g., \"آموزش‌محور\") directly to formal bylaws before vector retrieval.",
-        "height": 812,
+        "content": "#  RAG Inference & Conversational Agent\n\n### Architecture & Data Flow\nThis production-grade conversational agent handles real-time student queries by bridging the Next.js frontend with enterprise-grade RAG components.\n\n---\n\n### Execution Steps:\n1. **Webhook Trigger (POST):**\n   - Receives asynchronous chat payloads containing the user's question and dynamic `sessionId` from the frontend API route.\n\n2. **Conversational AI Agent (LangChain-powered):**\n   - **System Prompt & CoT:** Analyzes colloquial student terms (e.g., \"مشروطی\") and maps them to formal bylaws before querying.\n   - **Tool Calling (`search_sharif_rules`):** Queries the Qdrant Cloud vector store to retrieve relevant excerpts from Sharif University's official bylaws.\n\n3. **Persistent Memory Layer (PostgreSQL):**\n   - Dynamically tracks multi-turn conversations using the incoming `sessionId` mapped to `Postgres Chat Memory`, ensuring isolated chat histories per session.\n\n4. **Respond to Webhook:**\n   - Packages the LLM's structured output securely into standard JSON format (`{ \"answer\": \"...\" }`) and transmits it back to the Next.js backend.",
+        "height": 876,
         "width": 872,
         "color": 5
       },
@@ -58,8 +58,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.2,
       "position": [
-        528,
-        368
+        416,
+        496
       ],
       "id": "8c0b716e-295c-4d07-9016-a6ef0ebd0405",
       "name": "Google Gemini Chat Model",
@@ -72,12 +72,15 @@
       }
     },
     {
-      "parameters": {},
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=sharif_demo_1"
+      },
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.4,
       "position": [
-        672,
-        368
+        640,
+        512
       ],
       "id": "81f5ca23-0615-41bb-bc0a-87a7ca430d20",
       "name": "Postgres Chat Memory",
@@ -108,8 +111,8 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.2,
       "position": [
-        -608,
-        128
+        -592,
+        256
       ],
       "id": "c7921196-84aa-41c8-89c9-f3fa94e46942",
       "name": "PDF Upload Webhook",
@@ -128,8 +131,8 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        -192,
-        272
+        -160,
+        384
       ],
       "id": "391a4db4-b4ea-4c8a-b6c7-6cded0414997",
       "name": "PDF Document Parser"
@@ -144,7 +147,7 @@
       "typeVersion": 1,
       "position": [
         32,
-        416
+        512
       ],
       "id": "b0b9c0ca-1b64-4d6e-8067-21f6d30c0409",
       "name": "Semantic Text Chunking"
@@ -164,7 +167,7 @@
       "typeVersion": 1.3,
       "position": [
         -416,
-        128
+        256
       ],
       "id": "7e0b253d-0dad-4075-9d35-0d71526de901",
       "name": "Qdrant Vector Indexer",
@@ -178,6 +181,8 @@
     },
     {
       "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.question }}",
         "options": {
           "systemMessage": "شما مشاور و دستیار هوشمند آموزش دانشگاه صنعتی شریف هستید.\nشما به ابزار search_sharif_rules برای جستجو در متن رسمی آیین‌نامه‌ها دسترسی دارید.\n\n### فرآیند الزامی پاسخ‌دهی (در دو مرحله فکر کن و عمل کن):\n\nمرحله ۱: درک منظور دانشجو و بازنویسی کوئری (Query Transformation)\nدانشجویان از واژگان محاوره‌ای، مختصر و ضمایر ارجاعی استفاده می‌کنند. قبل از اینکه به ابزار کیودرنت سر بزنی، در پیام کاربر دقیق شو:\n- اگر سوال به پیام‌های قبلی وابسته است (مثلاً می‌گوید «اگه بازم تکرار بشه چی؟» یا «توی اون حالت چطور؟»)، با توجه به تاریخچه گفتگو، فاعل و موضوع دقیق را جایگزین کن.\n- اصطلاحات عامیانه را به زبان دقیق آیین‌نامه شریف معادل‌سازی کن:\n  * «آموزش‌محور» ⬅️ \"شیوه آموزشی بدون پایان‌نامه\"\n  * «پژوهش‌محور» ⬅️ \"شیوه آموزشی - پژوهشی (با پایان‌نامه)\"\n  * «مشروطی» ⬅️ \"میانگین نمرات کمتر از ۱۴\" / \"محرومیت از تحصیل در دو نیمسال\"\n  * «افتادن / رد شدن» ⬅️ \"حداقل نمره قبولی در هر درس ۱۲\" / \"عدم کسب نمره قبولی\"\n  * «حذف ترم / مرخصی» ⬅️ \"مرخصی تحصیلی ماده ۶\"\n  * «حذف اضطراری» ⬅️ \"دستورالعمل حذف تک‌درس پیوست ۳\"\n  * «سنوات» ⬅️ \"طول دوره ۴ نیمسال\" / \"افزایش سنوات تحصیلی ماده ۵\"\n  * «دروس جبرانی» ⬅️ \"درس‌های جبرانی ماده ۱۶ حداکثر ۱۲ واحد\"\n  * «نمره دفاع / مهلت مقاله» ⬅️ \"نمره J و تبدیل به P/F ماده ۳۱\"\n\nمرحله ۲: فراخوانی ابزار و پاسخ مستند\n- کوئری رسمی بازنویسی‌شده مرحله ۱ را به عنوان ورودی به ابزار search_sharif_rules بفرست.\n- بر اساس محتوای بازیابی‌شده پاسخ بده. پاسخ باید به زبان فارسی روان، شفاف و با ذکر ماده/تبصره آیین‌نامه باشد و مستقیماً تکلیف دانشجو را مشخص کند.\n- هرگز نگو «به آیین‌نامه مراجعه کنید»؛ زیرا شما خود مرجع پاسخ‌گویی هستید.\n\nدر طول مکالمه، وضعیت تحصیلی دانشجو (مقطع تحصیلی، رشته، تعداد نیمسال‌های گذرانده‌شده، وضعیت مشروطی یا واحدهای باقی‌مانده) را در صورت اعلام از طرف کاربر به خاطر بسپار و در پاسخ‌های بعدی به قوانین مرتبط با همان وضعیت استناد کن."
         }
@@ -185,8 +190,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        656,
-        128
+        544,
+        304
       ],
       "id": "0fa12209-8093-49a4-9d97-5c238240e59e",
       "name": "Educational Advisor Agent",
@@ -211,20 +216,6 @@
     },
     {
       "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        400,
-        128
-      ],
-      "id": "e23bf401-4044-48f1-9066-f522ca5e8b84",
-      "name": "Chat Message Input",
-      "webhookId": "4091fa09-fb9a-4039-9411-7104d213f601"
-    },
-    {
-      "parameters": {
         "mode": "retrieve-as-tool",
         "toolDescription": "Searches official Sharif University bylaws, including MSc regulations, passing grades, thesis, educational methods, and probation rules. Input should be formal educational terms.",
         "qdrantCollection": {
@@ -239,8 +230,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
       "typeVersion": 1.3,
       "position": [
-        800,
-        368
+        832,
+        528
       ],
       "id": "18f6c60d-d67e-49ec-a1dd-bc1cd4366dab",
       "name": "search_sharif_rules",
@@ -250,6 +241,38 @@
           "name": "Qdrant account"
         }
       }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sharif-copilot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        304
+      ],
+      "id": "dd13a4e7-9561-4419-821b-af3d6b82e6ab",
+      "name": "Webhook",
+      "webhookId": "f7104c28-2581-4ce2-abbb-0a897ad56e01"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"answer\": $json.output } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        896,
+        304
+      ],
+      "id": "3375cccd-0c64-402c-bf52-a3a462ce02d6",
+      "name": "Respond to Webhook"
     }
   ],
   "pinData": {},
@@ -325,7 +348,18 @@
         ]
       ]
     },
-    "Chat Message Input": {
+    "search_sharif_rules": {
+      "ai_tool": [
+        [
+          {
+            "node": "Educational Advisor Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
       "main": [
         [
           {
@@ -336,12 +370,12 @@
         ]
       ]
     },
-    "search_sharif_rules": {
-      "ai_tool": [
+    "Educational Advisor Agent": {
+      "main": [
         [
           {
-            "node": "Educational Advisor Agent",
-            "type": "ai_tool",
+            "node": "Respond to Webhook",
+            "type": "main",
             "index": 0
           }
         ]
@@ -353,7 +387,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "eff1c684-ac73-4e9c-97e7-47349542d5fe",
+  "versionId": "18d72177-520b-425c-8e94-00146e60ba53",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "3e2fe44d912cff8baade04deeae5fab81664f14d3b906c4d802bf55064b6ae86"
