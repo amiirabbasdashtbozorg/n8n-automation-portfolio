@@ -493,7 +493,7 @@ function score(g,a){
   return {g,pct:Math.round(Math.max(0,Math.min(1,total))*100),reasons};
 }
 async function renderResult(){
-   const n8nWebhookUrl = "https://wham-aqueduct-tiptoeing.ngrok-free.dev/webhook-test/game-master";
+   const n8nWebhookUrl = "http://localhost:5678/webhook/game-master"; // production webhook URL (workflow must be Active)
 
   const v=$('#v-rec');
   v.innerHTML=`<div class="rec" style="text-align:center; padding: 40px;">

@@ -2,10 +2,14 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
+    const webhookUrl = process.env.N8N_CHAT_WEBHOOK_URL;
+      if (!webhookUrl) {
+        throw new Error("N8N_CHAT_WEBHOOK_URL is not set (see .env.example)");
+    }
     const body = await req.json();
     
     // ارسال سوال کاربر به همراه شناسه یکتای گفتگو به سمت n8n
-    const n8nResponse = await fetch("http://127.0.0.1:5678/webhook-test/sharif-copilot", {
+    const n8nResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

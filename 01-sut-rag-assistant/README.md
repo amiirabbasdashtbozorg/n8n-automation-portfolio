@@ -1,3 +1,7 @@
+# 🎓 SUT Academic Regulations Enterprise RAG Assistant
+
+A production-ready, full-stack conversational Retrieval-Augmented Generation (RAG) system built for Sharif University students, featuring a modern Next.js frontend and an n8n-powered backend.
+
 ## 📸 Preview
 
 ### 🎨 Frontend Interface
@@ -9,11 +13,6 @@
 <p align="center">
   <img src="assets/workflow.png" alt="Workflow Preview" width="85%"/>
 </p>
-
-
-# 🎓 SUT Academic Regulations Enterprise RAG Assistant
-
-A production-ready, full-stack conversational Retrieval-Augmented Generation (RAG) system built for Sharif University students, featuring a modern Next.js frontend and an n8n-powered backend.
 
 ---
 
@@ -34,3 +33,19 @@ A production-ready, full-stack conversational Retrieval-Augmented Generation (RA
 * **LLM & Embeddings:** Google Gemini (`gemini-3.1-flash-lite`, `gemini-embedding-001`)
 * **Vector Store:** Qdrant Cloud
 * **Memory & Database:** PostgreSQL
+
+---
+
+ ## 🚀 Setup
+
+**Prerequisites:** the root Docker stack is running (see the repository root README), Node.js 20.9+, a Google AI Studio API key, a Qdrant Cloud cluster (URL + API key).
+
+1. Import `SUT Academic RAG Assistant.json` into n8n and create credentials for Google Gemini (PaLM), Qdrant and Postgres (host `postgres`).
+2. **One-time ingestion:** enable the "PDF Upload Webhook" and "Qdrant Vector Indexer" nodes, execute the flow, upload the PDFs from `data/`, then disable both nodes again. Check that the `sharif_rules` collection exists in Qdrant.
+3. Activate the workflow. The chat endpoint is `POST http://localhost:5678/webhook/sharif-copilot`.
+4. Start the frontend: see `frontend/sut-academic-copilot/README.md`.
+
+## ⚠️ Known limitations
+
+- Answers are based only on the three documents in `data/`.
+- Requires valid Gemini and Qdrant credentials; Gemini model availability may vary by account.

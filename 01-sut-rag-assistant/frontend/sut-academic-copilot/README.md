@@ -14,8 +14,7 @@ A Persian-first, RTL chat interface for the SUT Academic Regulations RAG workflo
 
 - Node.js 20.9+ recommended
 - npm
-- A working n8n Chat Trigger workflow
-
+- The imported "SUT Academic RAG Assistant" workflow, set to Active (POST Webhook at   /webhook/sharif-copilot)
 ## Run locally
 
 ```bash
@@ -23,7 +22,7 @@ npm install
 cp .env.example .env.local
 ```
 
-Edit `.env.local` and set `N8N_CHAT_WEBHOOK_URL` to the production webhook URL shown by your n8n Chat Trigger. Do not expose this URL via a `NEXT_PUBLIC_` variable.
+Edit `.env.local` and set `N8N_CHAT_WEBHOOK_URL` to the production webhook URL of the imported workflow (default: http://localhost:5678/webhook/sharif-copilot). Do not expose this URL via a `NEXT_PUBLIC_` variable.
 
 ```bash
 npm run dev

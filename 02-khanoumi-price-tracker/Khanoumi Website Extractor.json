@@ -160,17 +160,13 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "1GtLmSv1ISgVfRxibijtLGTtRSDD3Ml6AFe9Eb0H4YOo",
-          "mode": "list",
-          "cachedResultName": "Khanoumi",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GtLmSv1ISgVfRxibijtLGTtRSDD3Ml6AFe9Eb0H4YOo/edit?usp=drivesdk"
+          "value": "=YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GtLmSv1ISgVfRxibijtLGTtRSDD3Ml6AFe9Eb0H4YOo/edit#gid=0"
+          "value": "=sheet1",
+          "mode": "name"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -318,9 +314,10 @@
   "active": false,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
-  "versionId": "9d2d8873-d7dc-428f-9cb8-1b6df7e2737b",
+  "versionId": "4c1a79bd-0627-48d5-90fd-686ea251dfc6",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "3e2fe44d912cff8baade04deeae5fab81664f14d3b906c4d802bf55064b6ae86"

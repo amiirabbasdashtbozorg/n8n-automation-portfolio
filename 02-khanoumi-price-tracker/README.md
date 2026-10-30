@@ -1,8 +1,8 @@
 # 🛍️ Automated E-Commerce Price Intelligence & Discount Tracker
 
-![Workflow Architecture](./assets/workflow-preview.png)
-
 An end-to-end automated ETL & data aggregation pipeline built in **n8n** that continuously monitors e-commerce flash sales, cleanses multi-currency/bilingual pricing data, and syncs updates to Google Sheets in near real-time.
+
+![Workflow Architecture](./assets/workflow-preview.png)
 
 ---
 
@@ -19,3 +19,18 @@ An end-to-end automated ETL & data aggregation pipeline built in **n8n** that co
 * **Web Scraping:** Browserless / Headless Chrome
 * **Data Processing:** JavaScript (ES6+, Regex, DOM Selectors)
 * **Storage / Sink:** Google Sheets API (Upsert Operations)
+
+---
+
+## 🚀 Setup
+
+1. Import `Khanoumi Website Extractor.json` into n8n.
+2. Create a **Query Auth** credential for the Browserless node: name `token`, value = your Browserless API token.
+3. Create a Google Sheet with this exact header row: `Product Name | Percentage Off | Price Before | Price After | URL`.
+4. In the "Upsert to Google Sheets" node, connect your Google Sheets OAuth2 credential and replace `YOUR_GOOGLE_SHEET_ID` with the ID from the sheet URL (`.../spreadsheets/d/<ID>/edit`).
+5. Execute once manually, then activate (runs every 30 minutes).
+
+## ⚠️ Known limitations
+
+- The target site (khanoumi.com) may be unreachable from outside Iran.
+- CSS selectors (`a.relative`) depend on the site's current markup and may need updating.

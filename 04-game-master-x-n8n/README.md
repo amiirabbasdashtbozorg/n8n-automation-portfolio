@@ -1,3 +1,9 @@
+# 🎲 AI-Powered Board Game Recommender & Game Master
+
+A full-stack, AI-driven recommendation system designed for board game cafes. This project bridges a modern Single Page Application (SPA) frontend with an automated backend built on **n8n**, utilizing advanced LLMs via **OpenRouter** to provide intelligent, contextual game suggestions.
+
+---
+
 ## 📸 Preview
 
 ### 🎨 Frontend Interface (SPA)
@@ -15,10 +21,6 @@
 </p>
 
 
-# 🎲 AI-Powered Board Game Recommender & Game Master
-
-A full-stack, AI-driven recommendation system designed for board game cafes. This project bridges a modern Single Page Application (SPA) frontend with an automated backend built on **n8n**, utilizing advanced LLMs via **OpenRouter** to provide intelligent, contextual game suggestions.
-
 ---
 
 ## 🏗️ Architecture & Tech Stack
@@ -35,3 +37,16 @@ A full-stack, AI-driven recommendation system designed for board game cafes. Thi
 3. **Data Merging:** A Code Node injects a curated board game database and merges it with the user's preferences.
 4. **LLM Reasoning:** The Basic LLM Chain evaluates constraints, calculates match percentages, and generates tailored justifications.
 5. **Response Delivery:** The data is transformed back into a clean JSON array and rendered dynamically on the user interface.
+
+---
+
+## 🚀 Setup
+
+1. Import `n8n-workflow/AI-Powered Game Master.json` into n8n and attach an OpenRouter credential.
+2. Activate the workflow. The endpoint is `POST http://localhost:5678/webhook/game-master`.
+3. Open `frontend/index.html` in a browser. If your n8n runs elsewhere, edit `n8nWebhookUrl` in the `renderResult` function.
+
+## ⚠️ Known limitations
+
+- The webhook has no authentication; set a spending limit on your OpenRouter key.
+- The game catalog is a static list inside the "Code in JavaScript" node.
